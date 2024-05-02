@@ -163,3 +163,6 @@ INSERT INTO BARRIO(IdBarrio, Descripcion, IdCiudad, IdDepartamento) VALUES
 
 					('030201', 'Alto Laran', '0302', '03'),
 					('030202', 'Nieva', '0302', '03')
+
+
+
