@@ -84,3 +84,11 @@ C:\VisualStudio\Tienda de alquiler\Sistema Alquiler\CapaPresentacionAdmin\obj\De
 C:\VisualStudio\Tienda de alquiler\Sistema Alquiler\CapaPresentacionAdmin\obj\Debug\CapaPresentacionAdmin.csproj.CopyComplete
 C:\VisualStudio\Tienda de alquiler\Sistema Alquiler\CapaPresentacionAdmin\obj\Debug\CapaPresentacionAdmin.dll
 C:\VisualStudio\Tienda de alquiler\Sistema Alquiler\CapaPresentacionAdmin\obj\Debug\CapaPresentacionAdmin.pdb
+C:\VisualStudio\Tienda de alquiler\Sistema Alquiler\CapaPresentacionAdmin\bin\CapaEntidad.dll
+C:\VisualStudio\Tienda de alquiler\Sistema Alquiler\CapaPresentacionAdmin\bin\CapaNegocio.dll
+C:\VisualStudio\Tienda de alquiler\Sistema Alquiler\CapaPresentacionAdmin\bin\CapaDatos.dll
+C:\VisualStudio\Tienda de alquiler\Sistema Alquiler\CapaPresentacionAdmin\bin\CapaEntidad.pdb
+C:\VisualStudio\Tienda de alquiler\Sistema Alquiler\CapaPresentacionAdmin\bin\CapaNegocio.pdb
+C:\VisualStudio\Tienda de alquiler\Sistema Alquiler\CapaPresentacionAdmin\bin\CapaDatos.pdb
+C:\VisualStudio\Tienda de alquiler\Sistema Alquiler\CapaPresentacionAdmin\bin\System.Data.SqlClient.dll
+C:\VisualStudio\Tienda de alquiler\Sistema Alquiler\CapaPresentacionAdmin\bin\System.Data.SqlClient.xml

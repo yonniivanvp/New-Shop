@@ -100,8 +100,9 @@ IdDepartamento varchar (2) NOT NULL
 );
 
 Select *from USUARIO
-INSERT INTO USUARIO (Nombres, Apellidos, Correo, Clave) 
-			VALUES ('Mariana', 'Vergara', 'maricanavergara@prueba.com', 'ecd71870d1963316a97e3ac3408c9835ad8cf0f3c1bc703527c30265534f75ae')
+INSERT INTO USUARIO (Nombres, Apellidos, Correo, Clave) VALUES 
+					('Mariana', 'Vergara', 'maricanavergara@prueba.com', 'ecd71870d1963316a97e3ac3408c9835ad8cf0f3c1bc703527c30265534f75ae'),
+					('Julian', 'Vanegas', 'julianvanega@prueba.com', 'ecd71870d1963316a97e3ac3408c9835ad8cf0f3c1bc703527c30265534f75ae')
 
 
 SELECT *FROM CATEGORIA
@@ -166,3 +167,4 @@ INSERT INTO BARRIO(IdBarrio, Descripcion, IdCiudad, IdDepartamento) VALUES
 
 
 
+					select IdUsuario, Nombres, Apellidos, Correo, Clave, Reestablecer, Activo from USUARIO
