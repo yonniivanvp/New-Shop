@@ -167,4 +167,123 @@ INSERT INTO BARRIO(IdBarrio, Descripcion, IdCiudad, IdDepartamento) VALUES
 
 
 
-					select IdUsuario, Nombres, Apellidos, Correo, Clave, Reestablecer, Activo from USUARIO
+
+CREATE PROC sp_RegistrarUsuario(
+@Nombres varchar(100),
+@Apellidos varchar(100),
+@Correo varchar(100),
+@Clave varchar(100),
+@Activo bit,
+@Mensaje varchar(500) OUTPUT,
+@Resultado int OUTPUT
+)
+AS
+BEGIN
+    SET @Resultado = 0;
+
+    IF NOT EXISTS (SELECT * FROM USUARIO WHERE Correo = @Correo)
+    BEGIN
+        INSERT INTO USUARIO (Nombres, Apellidos, Correo, Clave, Activo)
+        VALUES (@Nombres, @Apellidos, @Correo, @Clave, @Activo);
+
+        SET @Resultado = SCOPE_IDENTITY();
+    END
+    ELSE
+        SET @Mensaje = 'El correo del usuario ya existe';
+END;
+
+
+create proc sp_EditarUsuario(
+    @IdUsuario int,
+    @Nombres varchar(100),
+    @Apellidos varchar(100),
+    @Correo varchar(100),
+    @Activo bit,
+    @Mensaje varchar(500) output,
+    @Resultado bit output
+)
+as
+begin
+    SET @Resultado = 0
+    IF NOT EXISTS (SELECT * FROM USUARIO WHERE Correo = @Correo AND IdUsuario != @IdUsuario)
+    BEGIN
+        UPDATE TOP (1) USUARIO
+        SET Nombres = @Nombres,
+            Apellidos = @Apellidos,
+            Correo = @Correo,
+            Activo = @Activo
+        WHERE IdUsuario = @IdUsuario
+
+        SET @Resultado = 1
+    END
+    ELSE
+        SET @Mensaje = 'El correo del usuario ya existe'
+END
+
+
+create proc sp_RegistrarCategoria(
+@Descripcion varchar(100),
+@Activo bit,
+@Mensaje varchar (500) output,
+@Resultado int output
+)
+as
+begin
+   SET @Resultado = 0
+   IF NOT EXISTS (SELECT * FROM CATEGORIA WHERE Descripcion = @Descripcion)
+   begin  
+		insert into CATEGORIA (Descripcion, Activo) values
+        (@Descripcion, @Activo)
+
+		SET @Resultado = scope_identity()
+   end
+   else
+   set @Mensaje = 'La categoria ya existe'
+end
+
+
+create proc sp_EditarCategoria(
+@IdCategoria int,
+@Descripcion varchar(100),
+@Activo bit,
+@Mensaje varchar(500) output,
+@Resultado bit output
+)
+as
+begin
+	SET @Resultado = 0
+	IF NOT EXISTS (SELECT * FROM CATEGORIA WHERE Descripcion = @Descripcion and IdCategoria != @IdCategoria)
+    begin
+
+          update top (1) CATEGORIA set
+          Descripcion = @Descripcion,
+          Activo = @Activo
+          where IdCategoria = @IdCategoria
+		  SET @Resultado = 1
+     end
+	 else
+	  set @Mensaje = 'La categoria ya existe'
+end
+
+
+CREATE PROC sp_EliminarCategoria (
+@IdCategoria INT,
+@Mensaje VARCHAR(500) OUTPUT,
+@Resultado BIT OUTPUT
+)
+AS
+BEGIN
+    SET @Resultado = 0;
+
+    IF NOT EXISTS (
+        SELECT * FROM PRODUCTO P
+        INNER JOIN CATEGORIA C ON C.IdCategoria = P.IdCategoria
+        WHERE P.IdCategoria = @IdCategoria
+    )
+    BEGIN
+        DELETE TOP (1) FROM CATEGORIA WHERE IdCategoria = @IdCategoria;
+        SET @Resultado = 1;
+    END
+    ELSE
+        SET @Mensaje = 'La categoría se encuentra relacionada a un producto';
+END
