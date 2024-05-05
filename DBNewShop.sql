@@ -287,3 +287,6 @@ BEGIN
     ELSE
         SET @Mensaje = 'La categoría se encuentra relacionada a un producto';
 END
+
+
+Select *FROM CATEGORIA
