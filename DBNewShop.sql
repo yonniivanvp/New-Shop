@@ -19,7 +19,7 @@ FechaRegistro datetime default getdate()
 );
 
 CREATE TABLE PRODUCTO(
-Idproducto int primary key identity,
+IdProducto int primary key identity,
 Nombre varchar (500),
 Descripcion varchar (500),
 IdMarca int references Marca(IdMarca),
@@ -369,3 +369,103 @@ BEGIN
     SET @Mensaje = 'La marca se encuentra relacionada a un producto';
 END
 
+
+CREATE PROC sp_RegistrarProducto(
+@Nombre varchar(100),
+@Descripcion varchar(100),
+@IdMarca varchar(100),
+@IdCategoria varchar(100),
+@Precio decimal(10,2),
+@Stock int,
+@Activo bit,
+@Mensaje varchar(500) output,
+@Resultado int output
+)
+as
+begin  
+	SET @Resultado = 0
+    IF NOT EXISTS (SELECT *FROM PRODUCTO WHERE Nombre = @Nombre)
+    begin
+         insert into PRODUCTO (Nombre, Descripcion, IdMarca, IdCategoria, Precio, Stock, Activo) values
+         (@Nombre, @Descripcion, @IdMarca, @IdCategoria, @Precio, @Stock, @Activo)
+		 SET @Resultado = SCOPE_IDENTITY()
+    end                                                                                  
+    else
+        set @Mensaje = 'El producto ya existe'
+end
+
+Select *from PRODUCTO
+
+
+create proc sp_EditarProducto(
+  @IdProducto int,
+  @Nombre varchar(100),
+  @Descripcion varchar(100),
+  @IdMarca varchar(100),
+  @IdCategoria varchar(100),
+  @Precio decimal(10,2),
+  @Stock int,
+  @Activo bit,
+  @Mensaje varchar(500) output,
+  @Resultado bit output
+)
+as
+begin
+  SET @Resultado = 0;
+
+  IF NOT EXISTS (SELECT *FROM PRODUCTO WHERE Nombre = @Nombre and IdProducto != @IdProducto)
+  begin
+    update PRODUCTO set
+      Nombre = @Nombre,
+      Descripcion = @Descripcion,
+      IdMarca = @IdMarca,
+      IdCategoria = @IdCategoria,
+      Precio = @Precio,
+      Stock = @Stock,
+      Activo = @Activo
+    where IdProducto = @IdProducto;
+
+    SET @Resultado = 1;
+  end
+  else
+    set @Mensaje = 'El producto ya existe';
+end
+
+
+CREATE PROCEDURE updateProducto
+  @rutaImagen NVARCHAR(MAX),
+  @nombreImagen NVARCHAR(MAX),
+  @idProducto INT
+AS
+BEGIN
+  UPDATE producto
+  SET RutaImagen = @rutaImagen,
+      NombreImagen = @nombreImagen
+  WHERE IdProducto = @idProducto;
+END;
+
+
+CREATE PROC sp_EliminarProducto (
+    @IdProducto INT,
+    @Mensaje VARCHAR(500) OUTPUT,
+    @Resultado BIT OUTPUT
+)
+AS
+BEGIN
+    SET @Resultado = 0;
+
+    IF NOT EXISTS (
+        SELECT * FROM DETALLE_VENTA dv
+        INNER JOIN PRODUCTO p ON p.IdProducto = dv.IdProducto
+        WHERE p.IdProducto = @IdProducto
+    )
+    BEGIN
+        DELETE TOP (1) FROM PRODUCTO WHERE IdProducto = @IdProducto;
+        SET @Resultado = 1;
+    END
+    ELSE
+        SET @Mensaje = 'El producto se encuentra relacionado a una venta';
+END;
+
+
+select *from PRODUCTO
