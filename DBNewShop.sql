@@ -432,7 +432,7 @@ begin
 end
 
 
-CREATE PROCEDURE updateProducto
+CREATE PROCEDURE sp_ActualizarRutaImagen
   @rutaImagen NVARCHAR(MAX),
   @nombreImagen NVARCHAR(MAX),
   @idProducto INT
@@ -468,4 +468,33 @@ BEGIN
 END;
 
 
-select *from PRODUCTO
+CREATE PROC sp_ReporteDashdoard
+as
+begin
+select
+	(SELECT COUNT(*) FROM CLIENTE)[TotalCliente],
+	(SELECT ISNULL(SUM(CANTIDAD),0)FROM DETALLE_VENTA)[TotalVenta],
+	(SELECT COUNT(*)FROM PRODUCTO)[TotalProducto]
+end
+
+
+Create proc sp_ReporteVentas(
+@fechainicio varchar(10),
+@fechafin varchar(10),
+@idtransaccion varchar(50)
+)
+as
+begin
+	set dateformat dmy;
+
+
+SELECT CONVERT(CHAR(10), v.FechaVenta, 103)[FechaVenta] , CONCAT( c.Nombres, ' ' ,c.Apellidos)[Cliente],
+p.Nombre[Producto], p.Precio, dv.Cantidad, dv.Total, v.IdTransaccion
+FROM DETALLE_VENTA dv
+INNER JOIN PRODUCTO p on p.IdProducto = dv.IdProducto
+INNER JOIN VENTA v on v.IdVenta = dv.IdVenta
+INNER JOIN CLIENTE c on c.IdCliente = v.IdCliente
+where CONVERT(date, v.FechaVenta) between @fechainicio and @fechafin
+and v.IdTransaccion = iif(@idtransaccion = '', v.IdTransaccion, @idtransaccion)
+
+end
