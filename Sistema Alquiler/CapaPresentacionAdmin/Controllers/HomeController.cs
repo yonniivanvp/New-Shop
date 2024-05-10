@@ -16,6 +16,8 @@ using ClosedXML.Excel;
 //Permite conectar con el forms
 namespace CapaPresentacionAdmin.Controllers
 {
+
+    [Authorize]
     public class HomeController : Controller
     {
         public ActionResult Index()

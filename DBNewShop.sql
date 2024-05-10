@@ -498,3 +498,5 @@ where CONVERT(date, v.FechaVenta) between @fechainicio and @fechafin
 and v.IdTransaccion = iif(@idtransaccion = '', v.IdTransaccion, @idtransaccion)
 
 end
+
+
