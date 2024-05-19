@@ -22,7 +22,7 @@ namespace CapaEntidad
         public bool Activo { get; set; }
 
         public string Base64 { get; set; }
-        public string Extencion { get; set; }
+        public string Extension { get; set; }
     }
 
 }

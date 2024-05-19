@@ -46,26 +46,30 @@ CREATE TABLE CARRITO(
 IdCarrito int primary key identity,
 IdCliente int references CLIENTE(IdCliente),
 IdProducto int references PRODUCTO(IdProducto),
+FechaInicio datetime,
+FechaFin datetime,
 Cantidad int
 );
 
-CREATE TABLE VENTA(
-IdVenta int primary key identity,
+CREATE TABLE ALQUILER(
+IdAlquiler int primary key identity,
 IdCliente int references CLIENTE(IdCliente),
 TotalProducto int,
 MontoTotal decimal(10,2),
 Contacto varchar (50),
-IdDistrito varchar (10),
+IdBarrio varchar (10),
 Telefono varchar (50),
 Direccion varchar (500),
 IdTransaccion varchar (50),
-FechaVenta datetime default getdate()
+FechaAlquiler datetime default getdate()
 );
 
-CREATE TABLE DETALLE_VENTA(
+CREATE TABLE DETALLE_ALQUILER(
 IdDetalleVenta int primary key identity,
-IdVenta int references VENTA(IdVenta),
+IdAlquiler int references ALQUILER(IdAlquiler),
 IdProducto int references PRODUCTO(IdProducto),
+FechaInicio datetime,
+FechaFin datetime,
 Cantidad int,
 Total decimal (10,2)
 );
@@ -499,4 +503,256 @@ and v.IdTransaccion = iif(@idtransaccion = '', v.IdTransaccion, @idtransaccion)
 
 end
 
+
+create proc sp_RegistrarCliente(
+@Nombres varchar(100),
+@Apellidos varchar(100),
+@Correo varchar(100),
+@Clave varchar(100),
+@Mensaje varchar(500) output,
+@Resultado int output
+)
+as
+begin
+    SET @Resultado = 0
+    IF NOT EXISTS (SELECT * FROM CLIENTE WHERE Correo = @Correo)
+    begin
+        insert into CLIENTE (Nombres, Apellidos, Correo, Clave, Reestablecer) values
+        (@Nombres, @Apellidos, @Correo, @Clave, 0)
+        SET @Resultado = scope_identity()
+    end
+    else
+        set @Mensaje = 'El correo del usuario ya existe'
+end
+
+
+CREATE PROC sp_ExisteCarrito(
+@IdCliente INT,
+@IdProducto INT,
+@Resultado BIT OUTPUT
+)
+AS
+BEGIN
+    IF EXISTS (
+        SELECT * FROM carrito WHERE idcliente = @IdCliente AND idproducto = @IdProducto
+    )
+        SET @Resultado = 1
+    ELSE
+        SET @Resultado = 0
+END
+
+
+
+CREATE PROC sp_OperacionCarrito
+(
+    @IdCliente INT,
+    @IdProducto INT,
+	@FechaInicio DATETIME,
+	@FechaFin DATETIME,
+    @Sumar BIT,
+    @Mensaje VARCHAR(500) OUTPUT,
+    @Resultado BIT OUTPUT
+)
+AS
+BEGIN
+    SET @Resultado = 1
+    SET @Mensaje = ''
+    DECLARE @existecarrito BIT = IIF(EXISTS(SELECT * FROM carrito WHERE idcliente = @IdCliente AND idproducto = @IdProducto), 1, 0)
+    DECLARE @stockproducto INT = (SELECT stock FROM PRODUCTO WHERE IdProducto = @IdProducto);
+
+BEGIN TRY
+    BEGIN TRANSACTION OPERACION
+
+    if (@Sumar = 1)
+    begin
+        if (@stockproducto > 0)
+        begin
+            if (@existecarrito = 1)
+                update CARRITO set Cantidad = Cantidad + 1, FechaInicio = @FechaInicio, FechaFin = @FechaFin where idcliente = @IdCliente and idproducto = @IdProducto
+            else
+                insert into CARRITO (IdCliente, IdProducto, Cantidad, FechaInicio, FechaFin) values (@IdCliente, @IdProducto, 1, @FechaInicio, @FechaFin)
+			update PRODUCTO set Stock = Stock - 1 where IdProducto = @IdProducto
+	end
+    else
+    begin
+        set @Resultado = 0
+        set @Mensaje = 'El producto no cuenta con stock disponible'
+    end
+	end
+	else
+
+	begin                         
+		update CARRITO set Cantidad = Cantidad - 1 where idcliente = @IdCliente and idproducto = @IdProducto
+		update PRODUCTO set Stock=  Stock + 1 where IdProducto = @IdProducto
+	end
+	COMMIT TRANSACTION OPERACION
+END TRY
+BEGIN CATCH
+	SET @Resultado = 0
+	SET @Mensaje = ERROR_MESSAGE()
+	ROLLBACK TRANSACTION OPERACION
+END CATCH
+END
+
+
+
+
+CREATE FUNCTION fn_obtenerCarritoCliente(
+    @idcliente INT
+)
+RETURNS TABLE
+AS
+    RETURN (
+        SELECT
+            p.IdProducto,
+            m.Descripcion AS DesMarca,
+            p.Nombre,
+            p.Precio,
+            c.Cantidad,
+			CONVERT(CHAR(10), c.FechaInicio, 103)[FechaInicio],
+			CONVERT(CHAR(10), c.FechaFin, 103)[FechaFin],
+            p.RutaImagen,
+            p.NombreImagen
+        FROM CARRITO c
+        INNER JOIN PRODUCTO p ON p.IdProducto = c.IdProducto
+        INNER JOIN MARCA m ON m.IdMarca = p.IdMarca
+        WHERE c.IdCliente = @idcliente
+)
+
+
+CREATE PROC sp_EliminarCarrito(
+    @IdCliente INT,
+    @IdProducto INT,
+    @Resultado BIT OUTPUT
+)
+AS
+BEGIN
+
+    SET @Resultado = 1
+
+    DECLARE @cantidadproducto INT = (SELECT Cantidad FROM CARRITO WHERE IdCliente = @IdCliente AND IdProducto = @IdProducto)
+
+    BEGIN TRY
+
+        BEGIN TRANSACTION OPERACION
+
+            UPDATE PRODUCTO SET Stock = Stock + @cantidadproducto WHERE IdProducto = @IdProducto
+            DELETE TOP (1) FROM CARRITO WHERE IdCliente = @IdCliente AND IdProducto = @IdProducto
+
+            COMMIT TRANSACTION OPERACION
+
+    END TRY
+    BEGIN CATCH
+        SET @Resultado = 0
+        ROLLBACK TRANSACTION OPERACION
+    END CATCH
+END
+
+CREATE PROC sp_ActualizarFechaProductoCarrito(
+    @IdCliente INT,
+    @IdProducto INT,
+    @FechaInicio DATE,
+    @FechaFin DATE,
+    @Mensaje VARCHAR(500) OUTPUT,
+    @Resultado BIT OUTPUT
+)
+AS
+BEGIN
+    SET @Resultado = 1;
+    SET @Mensaje = '';
+
+    -- Validar que la fecha de inicio no sea anterior a hoy
+    IF @FechaInicio < CAST(GETDATE() AS DATE)
+    BEGIN
+        SET @Resultado = 0;
+        SET @Mensaje = 'La fecha de inicio no puede ser anterior a hoy.';
+        RETURN;
+    END
+
+    -- Validar que la fecha de inicio no sea mayor a la fecha final
+    IF @FechaInicio > @FechaFin
+    BEGIN
+        SET @Resultado = 0;
+        SET @Mensaje = 'La fecha de inicio no puede ser mayor a la fecha final.';
+        RETURN;
+    END
+
+    DECLARE @existecarrito BIT = IIF(EXISTS(SELECT * FROM CARRITO WHERE IdCliente = @IdCliente AND IdProducto = @IdProducto), 1, 0);
+
+    BEGIN TRY
+        BEGIN TRANSACTION OPERACION;
+
+        IF @existecarrito = 1
+        BEGIN
+            UPDATE CARRITO
+            SET FechaInicio = @FechaInicio,
+                FechaFin = @FechaFin
+            WHERE IdCliente = @IdCliente
+            AND IdProducto = @IdProducto;
+        END
+        ELSE
+        BEGIN
+            SET @Resultado = 0;
+            SET @Mensaje = 'No se encontró el producto en el carrito.';
+        END;
+
+        COMMIT TRANSACTION OPERACION;
+    END TRY
+    BEGIN CATCH
+        SET @Resultado = 0;
+        SET @Mensaje = ERROR_MESSAGE();
+        ROLLBACK TRANSACTION OPERACION;
+    END CATCH;
+END;
+
+
+CREATE TYPE [dbo].[EDetalle_Alquiler] AS TABLE(
+    [IdProducto] int NULL,
+    [Cantidad] int NULL,
+	[fechaInicio] datetime NULL,
+	[fechaFin] datetime NULL,
+    [Total] decimal(18,2) NULL
+)
+
+
+CREATE PROCEDURE usp_RegistrarAlquiler(
+    @IdCliente int,
+    @TotalProducto int,
+    @MontoTotal decimal(18,2),
+    @Contacto varchar(100),
+    @IdBarrio varchar(6),
+    @Telefono varchar(18),
+    @Direccion varchar(100),
+    @IdTransaccion varchar(50),
+    @DetalleAlquiler [EDetalle_Alquiler] READONLY,
+    @Resultado bit output,
+    @Mensaje varchar(500) output
+)
+AS
+BEGIN
+    BEGIN TRY
+        DECLARE @idalquiler int = 0
+        SET @Resultado = 1
+        SET @Mensaje = ''
+
+        BEGIN TRANSACTION registro
+
+        INSERT INTO ALQUILER(IdCliente, TotalProducto, MontoTotal, Contacto, IdBarrio, Telefono, Direccion, IdTransaccion)
+        VALUES(@IdCliente, @TotalProducto, @MontoTotal, @Contacto, @IdBarrio, @Telefono, @Direccion, @IdTransaccion)
+
+        SET @idalquiler = SCOPE_IDENTITY()
+
+        insert into DETALLE_ALQUILER (IdAlquiler, IdProducto, Cantidad, FechaInicio, FechaFin, Total)
+		select @idalquiler, IdProducto, Cantidad, fechaInicio, fechaFin, Total from @DetalleAlquiler
+
+		delete from CARRITO where IdCliente = @IdCliente
+
+		commit transaction registro
+  END TRY
+    BEGIN CATCH
+        set @Resultado = 0
+		set @Mensaje = ERROR_MESSAGE()
+		rollback transaction registro
+    END CATCH
+END
 

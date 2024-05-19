@@ -9,8 +9,8 @@ namespace CapaPresentacionTienda
         public static void RegisterBundles(BundleCollection bundles)
         {
             bundles.Add(new Bundle("~/bundles/jquery").Include(
-                        "~/Scripts/jquery-{version}.js"));
-
+                        "~/Scripts/jquery-{version}.js",
+                        "~/Scripts/jquery-ui-1.13.2.js"));
 
             //bundles.Add(new ScriptBundle("~/bundles/jqueryval").Include(
             //            "~/Scripts/jquery.validate*"));
@@ -21,9 +21,17 @@ namespace CapaPresentacionTienda
             //            "~/Scripts/modernizr-*"));
 
             bundles.Add(new Bundle("~/bundles/bootstrap").Include(
-                      "~/Scripts/bootstrap.bundle.js"));
+                      "~/Scripts/bootstrap.bundle.js",
+                      "~/Scripts/fontawesome/all.min.js",
+                      "~/Scripts/loadingoverlay.min.js",
+                      "~/Scripts/sweetalert.min.js"
+                      ));
 
-            bundles.Add(new StyleBundle("~/Content/css").Include("~/Content/Site.css"));
+            bundles.Add(new StyleBundle("~/Content/css").Include(
+                "~/Content/Site.css",
+                "~/Content/themes/base/jquery-ui.css",
+                "~/Content/sweetalert.css"
+                ));
         }
     }
 }
