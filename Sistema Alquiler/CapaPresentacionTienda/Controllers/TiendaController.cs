@@ -2,11 +2,15 @@
 using CapaNegocio;
 using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
 using System.Web.Services.Description;
+using System.Xml.Linq;
 
 namespace CapaPresentacionTienda.Controllers
 {
@@ -226,6 +230,86 @@ namespace CapaPresentacionTienda.Controllers
         {
             return View();
         }
+
+        [HttpPost]
+        public async Task<JsonResult> ProcesarPago(List<Carrito> oListaCarrito, Alquiler oAlquiler )
+        {
+            decimal total = 0;
+
+            DataTable detalle_alquiler = new DataTable();
+            detalle_alquiler.Locale = new CultureInfo("es-CO");
+            detalle_alquiler.Columns.Add("IdProducto", typeof(string));
+            detalle_alquiler.Columns.Add("Cantidad", typeof(int));
+            detalle_alquiler.Columns.Add("fechaInicio", typeof(string));
+            detalle_alquiler.Columns.Add("fechaFin", typeof(string));
+            detalle_alquiler.Columns.Add("Total", typeof(decimal));
+
+            foreach( Carrito oCarrito in oListaCarrito)
+            {
+                DateTime fechaInicio = DateTime.Parse(oCarrito.FechaInicio);
+                DateTime fechaFin = DateTime.Parse(oCarrito.FechaFin);
+
+                // Calcular la diferencia de días
+                int diferenciaDias = (fechaFin - fechaInicio).Days;
+
+                // Asegurarse de que la diferencia de días sea al menos 1
+                if (diferenciaDias < 1)
+                {
+                    diferenciaDias = 1;
+                }
+
+                decimal subtotal = oCarrito.Cantidad * oCarrito.oProducto.Precio * diferenciaDias;
+
+                total += subtotal;
+
+                detalle_alquiler.Rows.Add(new object[]
+                {
+                    oCarrito.oProducto.IdProducto,
+                    oCarrito.Cantidad,
+                    oCarrito.FechaInicio,
+                    oCarrito.FechaFin,
+                    subtotal
+                });
+            }
+
+            oAlquiler.MontoTotal = total;
+            oAlquiler.IdCliente = ((Cliente)Session["Cliente"]).IdCliente;
+
+            TempData["Alquiler"] = oAlquiler;
+            TempData["DetalleAlquiler"] = detalle_alquiler;
+
+            return Json(new { Status = true, Link = "/Tienda/PagoEfectuado?idTransaccion=code0001&status=true" }, JsonRequestBehavior.AllowGet);
+        }
+
+
+        public async Task<ActionResult> PagoEfectuado()
+        {
+            string idtransaccion = Request.QueryString["idTransaccion"];
+            bool status = Convert.ToBoolean(Request.QueryString["status"]);
+
+            ViewData["Status"] = status;
+
+            if(status)
+            {
+                Alquiler oAlquiler = (Alquiler)TempData["Alquiler"];
+
+                DataTable detalle_alquiler = (DataTable)TempData["DetalleAlquiler"];
+
+                oAlquiler.IdTransaccion = idtransaccion;
+
+                string mensaje = string.Empty;
+
+                bool respuesta = new CN_Alquiler().Registrar(oAlquiler, detalle_alquiler, out mensaje);
+
+                ViewData["IdTransaccion"] = oAlquiler.IdTransaccion;
+            }
+
+            return View();
+
+        }
+
+
+
 
 
     }
