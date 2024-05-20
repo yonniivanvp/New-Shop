@@ -369,7 +369,34 @@ namespace CapaPresentacionTienda.Controllers
         }
 
 
+        public ActionResult MiAlquiler()
+        {
+            int idcliente = ((Cliente)Session["Cliente"]).IdCliente;
 
+            List<DetalleAlquiler> oLista = new List<DetalleAlquiler>();
+
+            bool conversion;
+
+            oLista = new CN_Alquiler().ListarAlquiler(idcliente).Select(oc => new DetalleAlquiler()
+            {
+                oProducto = new Producto()
+                {
+                    Nombre = oc.oProducto.Nombre,
+                    Precio = oc.oProducto.Precio,
+                    Base64 = CN_Recursos.ConvertirBase64(Path.Combine(oc.oProducto.RutaImagen, oc.oProducto.NombreImagen), out conversion),
+                    Extension = Path.GetExtension(oc.oProducto.NombreImagen)
+
+                },
+                Cantidad = oc.Cantidad,
+                FechaInicio = Convert.ToDateTime(oc.FechaInicio).ToString("dd/MM/yyyy"),
+                FechaFin = Convert.ToDateTime(oc.FechaFin).ToString("dd/MM/yyyy"),
+                Total = oc.Total,
+                IdTransaccion = oc.IdTransaccion
+
+            }).ToList();
+
+            return View(oLista);
+        }
 
 
     }

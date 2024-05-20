@@ -6,6 +6,7 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Globalization;
 
 namespace CapaDatos
 {
@@ -52,6 +53,63 @@ namespace CapaDatos
 
             return respuesta;
         }
+
+
+        public List<DetalleAlquiler> ListarAlquiler(int idcliente)
+        {
+
+            List<DetalleAlquiler> lista = new List<DetalleAlquiler>();
+
+            try
+            {
+                //Cadena de conexicion a SQL
+                using (SqlConnection oconexion = new SqlConnection(Conexion.cn))
+                {
+                    string query = "select *from fn_ListarAlquiler(@idcliente)";
+
+                    SqlCommand cmd = new SqlCommand(query, oconexion);
+                    cmd.Parameters.AddWithValue("@idcliente", idcliente);
+                    cmd.CommandType = CommandType.Text;
+
+                    oconexion.Open();
+
+                    //Lee la ejecucion de la consulta
+                    using (SqlDataReader dr = cmd.ExecuteReader())
+                    {
+                        while (dr.Read())
+                        {
+                            lista.Add(new DetalleAlquiler()
+                            {
+                                oProducto = new Producto()
+                                {
+                                    Nombre = dr["Nombre"].ToString(),
+                                    Precio = Convert.ToDecimal(dr["Precio"], new CultureInfo("es-CO")),
+                                    RutaImagen = dr["RutaImagen"].ToString(),
+                                    NombreImagen = dr["NombreImagen"].ToString()
+                                },
+                                Cantidad = Convert.ToInt32(dr["Cantidad"]),
+                                FechaInicio = dr["FechaInicio"].ToString(),
+                                FechaFin = dr["FechaFin"].ToString(),
+                                Total = Convert.ToDecimal(dr["Total"], new CultureInfo("es-CO")),
+                                IdTransaccion = dr["IdTransaccion"].ToString()
+
+                            });
+
+                        }
+                    }
+
+                }
+            }
+            catch
+            {
+                lista = new List<DetalleAlquiler>();
+            }
+
+            return lista;
+        }
+
+
+
 
     }
 }

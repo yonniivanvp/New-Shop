@@ -756,3 +756,18 @@ BEGIN
     END CATCH
 END
 
+
+
+
+Create Function fn_ListarAlquiler(
+@idcliente int
+)
+RETURNS TABLE
+AS 
+RETURN
+(
+	SELECT P.RutaImagen, P.NombreImagen, P.Nombre, P.Precio, DA.Cantidad, DA.FechaInicio, DA.FechaFin, DA.Total, A.IdTransaccion FROM DETALLE_ALQUILER DA
+	INNER JOIN PRODUCTO P ON P.IdProducto = DA.IdProducto
+	INNER JOIN ALQUILER A ON A.IdAlquiler = DA.IdAlquiler
+	WHERE A.IdCliente = @idcliente
+);
