@@ -1,5 +1,6 @@
 ﻿using CapaEntidad;
 using CapaNegocio;
+using CapaNegocio.Paypal;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -244,6 +245,11 @@ namespace CapaPresentacionTienda.Controllers
             detalle_alquiler.Columns.Add("fechaFin", typeof(string));
             detalle_alquiler.Columns.Add("Total", typeof(decimal));
 
+            //Procesar pagos
+            List<Item> oListaItem = new List<Item>();
+
+
+
             foreach( Carrito oCarrito in oListaCarrito)
             {
                 DateTime fechaInicio = DateTime.Parse(oCarrito.FechaInicio);
@@ -262,6 +268,19 @@ namespace CapaPresentacionTienda.Controllers
 
                 total += subtotal;
 
+                oListaItem.Add(new Item()
+                {
+                    name = oCarrito.oProducto.Nombre,
+                    quantity = oCarrito.Cantidad.ToString(),
+                    startdate = oCarrito.FechaInicio.ToString(),
+                    enddate = oCarrito.FechaFin.ToString(),
+                    unit_amount = new UnitAmount
+                    {
+                        currency_code = "USD",
+                        value = oCarrito.oProducto.Precio.ToString("G", new CultureInfo("es-CO"))
+                    }
+                });
+
                 detalle_alquiler.Rows.Add(new object[]
                 {
                     oCarrito.oProducto.IdProducto,
@@ -272,30 +291,71 @@ namespace CapaPresentacionTienda.Controllers
                 });
             }
 
+            PurchaseUnit purchaseUnit = new PurchaseUnit()
+            {
+                amount = new Amount()
+                {
+                    currency_code = "USD",
+                    value = total.ToString("G", new CultureInfo("es-CO")),
+                    breakdown = new Breakdown() 
+                    { 
+                        item_total = new ItemTotal()
+                        {
+                            currency_code = "USD",
+                            value = total.ToString("G", new CultureInfo("es-CO")),
+                        }
+                    }
+                },
+                description = "Alquiler de articulos mi alquiler",
+                items = oListaItem
+            };
+
+            Checkout_Order oCheckoutOrder = new Checkout_Order()
+            {
+                intent = "CAPTURE",
+                purchase_units = new List<PurchaseUnit>() { purchaseUnit },
+                application_context = new ApplicationContext()
+                {
+                    brand_name = "MiAlquiler.com",
+                    landing_page = "NO_PREFERENCE",
+                    user_action = "PAY_NOW",
+                    return_url = "https://localhost:44333/Tienda/PagoEfectuado",
+                    cancel_url = "https://localhost:44333/Tienda/Carrito"
+                }
+            };
+
             oAlquiler.MontoTotal = total;
             oAlquiler.IdCliente = ((Cliente)Session["Cliente"]).IdCliente;
 
             TempData["Alquiler"] = oAlquiler;
             TempData["DetalleAlquiler"] = detalle_alquiler;
 
-            return Json(new { Status = true, Link = "/Tienda/PagoEfectuado?idTransaccion=code0001&status=true" }, JsonRequestBehavior.AllowGet);
+
+            CN_Paypal opaypal = new CN_Paypal();
+            Response_Paypal<Response_Checkout> response_paypal = new Response_Paypal<Response_Checkout>();
+            response_paypal = await opaypal.CrearSolicitud(oCheckoutOrder);
+
+            return Json(response_paypal , JsonRequestBehavior.AllowGet);
         }
 
 
         public async Task<ActionResult> PagoEfectuado()
         {
-            string idtransaccion = Request.QueryString["idTransaccion"];
-            bool status = Convert.ToBoolean(Request.QueryString["status"]);
+            string token = Request.QueryString["token"];
 
-            ViewData["Status"] = status;
+            CN_Paypal opaypal = new CN_Paypal();
+            Response_Paypal<Response_Capture> response_paypal = new Response_Paypal<Response_Capture>();
+            response_paypal = await opaypal.AprobarPago(token);
 
-            if(status)
+            ViewData["Status"] = response_paypal.Status;
+
+            if(response_paypal.Status)
             {
                 Alquiler oAlquiler = (Alquiler)TempData["Alquiler"];
 
                 DataTable detalle_alquiler = (DataTable)TempData["DetalleAlquiler"];
 
-                oAlquiler.IdTransaccion = idtransaccion;
+                oAlquiler.IdTransaccion = response_paypal.Response.purchase_units[0].payments.captures[0].id;
 
                 string mensaje = string.Empty;
 

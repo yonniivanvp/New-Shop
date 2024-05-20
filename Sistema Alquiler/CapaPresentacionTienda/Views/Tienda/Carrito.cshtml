@@ -332,22 +332,6 @@
             })
         }
 
-        //function sumarTotal() {
-        //    var sumaTotal = parseFloat(0)
-
-        //    $("input.input-cantidad").each(function (i) {
-        //        var precio = $(this).data("oProducto").Precio;
-        //        var cantidad = parseFloat($(this).val())
-        //        var subtotal = precio * cantidad;
-
-        //        sumaTotal += subtotal;
-        //    })
-
-        //    $("#total").text(sumaTotal.toFixed(2))
-        //    $("#total").data("sumatotal",sumaTotal)
-
-        //}
-
         function sumarTotal() {
             var sumaTotal = parseFloat(0);
 
@@ -357,8 +341,12 @@
                 var subtotal = precio * cantidad;
 
                 // Capturar fechas de inicio y fin
-                var fechaInicio = obtenerFecha($(".fecha-inicio").val());
-                var fechaFin = obtenerFecha($(".fecha-fin").val());
+                var div_contenedor = $(this).closest("div.card-body");
+                var fechaInicioStr = div_contenedor.find("input.fecha-inicio").val();
+                var fechaFinStr = div_contenedor.find("input.fecha-fin").val();
+
+                var fechaInicio = obtenerFecha(fechaInicioStr);
+                var fechaFin = obtenerFecha(fechaFinStr);
 
                 // Calcular la diferencia en días entre las fechas
                 var diferenciaDias = calcularDiferenciaDias(fechaInicio, fechaFin);
@@ -380,7 +368,7 @@
 
         // Función para obtener la fecha en formato Date
         function obtenerFecha(fechaString) {
-            var partesFecha = fechaString.split('/');
+            var partesFecha = fechaString.split("/");
             var dia = parseInt(partesFecha[0]);
             var mes = parseInt(partesFecha[1]) - 1; // Meses en JavaScript van de 0 a 11
             var anio = parseInt(partesFecha[2]);
@@ -610,7 +598,13 @@
                 success: function (data) {
                     $.LoadingOverlay("hide");
                     if (data.Status) {
-                        window.location.href = data.Link;
+                        var jsonresult = data.Response;
+                        var links = jsonresult.links;
+
+                        var resultado = links.find(item => item.rel === "approve");
+
+                        window.location.href = resultado.href;
+
                     } else {
                         swal("", "Vuelva a intentarlo más tarde", "warning");
                     }

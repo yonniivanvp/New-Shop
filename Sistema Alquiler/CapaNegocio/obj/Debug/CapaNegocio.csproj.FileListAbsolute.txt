@@ -11,3 +11,7 @@ C:\VisualStudio\Tienda de alquiler\Sistema Alquiler\CapaNegocio\obj\Debug\CapaNe
 C:\VisualStudio\Tienda de alquiler\Sistema Alquiler\CapaNegocio\obj\Debug\CapaNegocio.pdb
 C:\VisualStudio\Tienda de alquiler\Sistema Alquiler\CapaNegocio\bin\Debug\System.Data.SqlClient.dll
 C:\VisualStudio\Tienda de alquiler\Sistema Alquiler\CapaNegocio\bin\Debug\System.Data.SqlClient.xml
+C:\VisualStudio\Tienda de alquiler\Sistema Alquiler\CapaNegocio\bin\Debug\Newtonsoft.Json.dll
+C:\VisualStudio\Tienda de alquiler\Sistema Alquiler\CapaNegocio\bin\Debug\System.Configuration.ConfigurationManager.dll
+C:\VisualStudio\Tienda de alquiler\Sistema Alquiler\CapaNegocio\bin\Debug\Newtonsoft.Json.xml
+C:\VisualStudio\Tienda de alquiler\Sistema Alquiler\CapaNegocio\bin\Debug\System.Configuration.ConfigurationManager.xml
