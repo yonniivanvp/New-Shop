@@ -255,7 +255,6 @@
     <Content Include="Views\Shared\_Layout.cshtml" />
     <Content Include="Views\Acceso\Index.cshtml" />
     <Content Include="Views\Acceso\Registrar.cshtml" />
-    <Content Include="Views\Acceso\Reestrablecer.cshtml" />
     <Content Include="Views\Acceso\CambiarClave.cshtml" />
     <Content Include="webfonts\fa-brands-400.svg" />
     <Content Include="webfonts\fa-regular-400.svg" />
@@ -278,6 +277,7 @@
     <Content Include="Views\Tienda\Carrito.cshtml" />
     <Content Include="Views\Tienda\PagoEfectuado.cshtml" />
     <Content Include="Views\Tienda\MiAlquiler.cshtml" />
+    <Content Include="Views\Acceso\Reestablecer.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

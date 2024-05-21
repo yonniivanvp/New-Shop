@@ -21,7 +21,7 @@ namespace CapaPresentacionTienda.Controllers
         {
             return View();
         }
-        public ActionResult Reestrablecer()
+        public ActionResult Reestablecer()
         {
             return View();
         }
@@ -96,7 +96,7 @@ namespace CapaPresentacionTienda.Controllers
 
 
         [HttpPost]
-        public ActionResult Reestrablecer(string correo)
+        public ActionResult Reestablecer(string correo)
         {
             Cliente cliente = new Cliente();
 

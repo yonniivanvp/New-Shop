@@ -13,7 +13,7 @@ namespace CapaDatos
     public class CD_Reporte
     {
 
-        public List<Reporte> Ventas(string fechainicio, string fechafin, string idtransaccion)
+        public List<Reporte> Alquiler(string fechainicio, string fechafin, string idtransaccion)
         {
 
             List<Reporte> lista = new List<Reporte>();
@@ -24,7 +24,7 @@ namespace CapaDatos
                 using (SqlConnection oconexion = new SqlConnection(Conexion.cn))
                 {
 
-                    SqlCommand cmd = new SqlCommand("sp_ReporteVentas", oconexion);
+                    SqlCommand cmd = new SqlCommand("sp_ReporteAlquiler", oconexion);
                     cmd.Parameters.AddWithValue("fechainicio", fechainicio);
                     cmd.Parameters.AddWithValue("fechafin", fechafin);
                     cmd.Parameters.AddWithValue("idtransaccion", idtransaccion);
@@ -40,7 +40,7 @@ namespace CapaDatos
                             lista.Add(
                             new Reporte()
                             {
-                                FechaVenta = dr["FechaVenta"].ToString(),
+                                FechaVenta = dr["FechaAlquiler"].ToString(),
                                 Cliente = dr["Cliente"].ToString(),
                                 Producto = dr["Producto"].ToString(),
                                 Precio = Convert.ToDecimal( dr["Precio"], new CultureInfo("es-CO")),
@@ -88,7 +88,7 @@ namespace CapaDatos
                             objeto = new DashBoard()
                             {
                                 TotalCliente = Convert.ToInt32(dr["TotalCliente"]),
-                                TotalVenta = Convert.ToInt32(dr["TotalVenta"]),
+                                TotalVenta = Convert.ToInt32(dr["TotalAlquiler"]),
                                 TotalProducto = Convert.ToInt32(dr["TotalProducto"])
                             };
                         }
