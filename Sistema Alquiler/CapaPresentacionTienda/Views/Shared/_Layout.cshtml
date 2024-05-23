@@ -31,7 +31,7 @@
                 </ul>
                 <form class="d-flex">
 
-                    @if (Session["Cliente"] == null)
+                    @if (Session["Usuario"] == null)
                     {
                         <a class="btn btn-outline-dark" aria-current="page" href="@Url.Action("Index","Acceso")"><i class="fas fa-sign-in-alt me-1"></i>Iniciar Sesión</a>
                     }

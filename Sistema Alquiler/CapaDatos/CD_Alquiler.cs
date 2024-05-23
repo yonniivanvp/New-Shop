@@ -19,7 +19,7 @@ namespace CapaDatos
                 using (SqlConnection oconexion = new SqlConnection(Conexion.cn))
                 {
                     SqlCommand cmd = new SqlCommand("usp_RegistrarAlquiler", oconexion);
-                    cmd.Parameters.AddWithValue("IdCliente", obj.IdCliente);
+                    cmd.Parameters.AddWithValue("IdArrendador", obj.IdArrendador);
                     cmd.Parameters.AddWithValue("TotalProducto", obj.TotalProducto);
                     cmd.Parameters.AddWithValue("MontoTotal", obj.MontoTotal);
                     cmd.Parameters.AddWithValue("Contacto", obj.Contacto);
@@ -52,7 +52,7 @@ namespace CapaDatos
         }
 
 
-        public List<DetalleAlquiler> ListarAlquiler(int idcliente)
+        public List<DetalleAlquiler> ListarAlquiler(int idusuario)
         {
 
             List<DetalleAlquiler> lista = new List<DetalleAlquiler>();
@@ -62,10 +62,10 @@ namespace CapaDatos
                 //Cadena de conexicion a SQL
                 using (SqlConnection oconexion = new SqlConnection(Conexion.cn))
                 {
-                    string query = "select *from fn_ListarAlquiler(@idcliente)";
+                    string query = "select *from fn_ListarAlquiler(@idusuario)";
 
                     SqlCommand cmd = new SqlCommand(query, oconexion);
-                    cmd.Parameters.AddWithValue("@idcliente", idcliente);
+                    cmd.Parameters.AddWithValue("@IdArrendador", idusuario);
                     cmd.CommandType = CommandType.Text;
 
                     oconexion.Open();

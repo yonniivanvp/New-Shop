@@ -125,7 +125,7 @@ namespace CapaDatos
                             lista.Add(
                             new Barrio()
                             {
-                                IdBarrio = dr["IdCiudad"].ToString(),
+                                IdBarrio = dr["IdBarrio"].ToString(),
                                 Descripcion = dr["Descripcion"].ToString()
                             }
                             );

@@ -13,7 +13,7 @@ namespace CapaDatos
     public class CD_Carrito
     {
 
-        public bool ExisteCarrito(int idcliente, int idproducto)
+        public bool ExisteCarrito(int idusuario, int idproducto)
         {
 
             bool resultado = true;
@@ -23,7 +23,7 @@ namespace CapaDatos
                 using (SqlConnection oconexion = new SqlConnection(Conexion.cn))
                 {
                     SqlCommand cmd = new SqlCommand("sp_ExisteCarrito", oconexion);
-                    cmd.Parameters.AddWithValue("IdCliente", idcliente);
+                    cmd.Parameters.AddWithValue("IdArrendador", idusuario);
                     cmd.Parameters.AddWithValue("IdProducto", idproducto);
 
                     cmd.Parameters.Add("Resultado", SqlDbType.Bit).Direction = ParameterDirection.Output;
@@ -46,7 +46,7 @@ namespace CapaDatos
         }
 
 
-        public bool OperacionCarrito(int idcliente, int idproducto, string fechainicio, string fechafin, bool sumar, out string Mensaje)
+        public bool OperacionCarrito(int idusuario, int idproducto, string fechainicio, string fechafin, bool sumar, out string Mensaje)
         {
 
             bool resultado = true;
@@ -58,7 +58,7 @@ namespace CapaDatos
                 using (SqlConnection oconexion = new SqlConnection(Conexion.cn))
                 {
                     SqlCommand cmd = new SqlCommand("sp_OperacionCarrito", oconexion);
-                    cmd.Parameters.AddWithValue("IdCliente", idcliente);
+                    cmd.Parameters.AddWithValue("IdArrendador", idusuario);
                     cmd.Parameters.AddWithValue("IdProducto", idproducto);
                     cmd.Parameters.AddWithValue("FechaInicio", Convert.ToDateTime(fechainicio));
                     cmd.Parameters.AddWithValue("FechaFin", Convert.ToDateTime(fechafin));
@@ -87,7 +87,7 @@ namespace CapaDatos
         }
 
 
-        public bool ActualizarFechaProductoCarrito(int idCliente, int idProducto, string fechaInicio, string fechaFin, out string mensaje)
+        public bool ActualizarFechaProductoCarrito(int idUsuario, int idProducto, string fechaInicio, string fechaFin, out string mensaje)
         {
             bool resultado = true;
             mensaje = string.Empty;
@@ -97,7 +97,7 @@ namespace CapaDatos
                 using (SqlConnection oconexion = new SqlConnection(Conexion.cn))
                 {
                     SqlCommand cmd = new SqlCommand("sp_ActualizarFechaProductoCarrito", oconexion);
-                    cmd.Parameters.AddWithValue("IdCliente", idCliente);
+                    cmd.Parameters.AddWithValue("IdArrendador", idUsuario);
                     cmd.Parameters.AddWithValue("IdProducto", idProducto);
                     cmd.Parameters.AddWithValue("FechaInicio", Convert.ToDateTime(fechaInicio));
                     cmd.Parameters.AddWithValue("FechaFin", Convert.ToDateTime(fechaFin));
@@ -124,7 +124,7 @@ namespace CapaDatos
         }
 
 
-        public int CantidadEnCarrito(int idcliente)
+        public int CantidadEnCarrito(int idusuario)
         {
             int resultado = 0;
 
@@ -132,8 +132,8 @@ namespace CapaDatos
             {
                 using (SqlConnection oconexion = new SqlConnection(Conexion.cn))
                 {
-                    SqlCommand cmd = new SqlCommand("select count(*) from carrito where idcliente = @idcliente", oconexion);
-                    cmd.Parameters.AddWithValue("@idcliente", idcliente);
+                    SqlCommand cmd = new SqlCommand("select count(*) from carrito where idarrendador = @idarrendador", oconexion);
+                    cmd.Parameters.AddWithValue("@IdArrendador", idusuario);
                     cmd.CommandType = CommandType.Text;
                     oconexion.Open();
 
@@ -149,7 +149,7 @@ namespace CapaDatos
         }
 
 
-        public List<Carrito> ListarProducto(int idcliente)
+        public List<Carrito> ListarProducto(int idusuario)
         {
 
             List<Carrito> lista = new List<Carrito>();
@@ -159,10 +159,10 @@ namespace CapaDatos
                 //Cadena de conexicion a SQL
                 using (SqlConnection oconexion = new SqlConnection(Conexion.cn))
                 {
-                    string query = "select *from fn_obtenerCarritoCliente(@idcliente)";
+                    string query = "select *from fn_obtenerCarritoCliente(@idusuario)";
 
                     SqlCommand cmd = new SqlCommand(query, oconexion);
-                    cmd.Parameters.AddWithValue("@idcliente", idcliente);
+                    cmd.Parameters.AddWithValue("@idusuario", idusuario);
                     cmd.CommandType = CommandType.Text;
 
                     oconexion.Open();
@@ -203,7 +203,7 @@ namespace CapaDatos
         }
 
 
-        public bool EliminarCarrito(int idcliente, int idproducto)
+        public bool EliminarCarrito(int idusuario, int idproducto)
         {
 
             bool resultado = true;
@@ -213,7 +213,7 @@ namespace CapaDatos
                 using (SqlConnection oconexion = new SqlConnection(Conexion.cn))
                 {
                     SqlCommand cmd = new SqlCommand("sp_EliminarCarrito", oconexion);
-                    cmd.Parameters.AddWithValue("IdCliente", idcliente);
+                    cmd.Parameters.AddWithValue("IdArrendador", idusuario);
                     cmd.Parameters.AddWithValue("IdProducto", idproducto);
 
                     cmd.Parameters.Add("Resultado", SqlDbType.Bit).Direction = ParameterDirection.Output;

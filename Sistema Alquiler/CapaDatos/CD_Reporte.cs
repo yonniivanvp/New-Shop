@@ -40,11 +40,13 @@ namespace CapaDatos
                             lista.Add(
                             new Reporte()
                             {
-                                FechaVenta = dr["FechaAlquiler"].ToString(),
+                                FechaAlquiler = dr["FechaAlquiler"].ToString(),
                                 Cliente = dr["Cliente"].ToString(),
                                 Producto = dr["Producto"].ToString(),
                                 Precio = Convert.ToDecimal( dr["Precio"], new CultureInfo("es-CO")),
                                 Cantidad = Convert.ToInt32( dr["Cantidad"]),
+                                FechaInicio = Convert.ToDateTime(dr["FechaInicio"]).ToString("dd/MM/yyyy"),
+                                FechaFin = Convert.ToDateTime(dr["FechaFin"]).ToString("dd/MM/yyyy"),
                                 Total = Convert.ToDecimal(dr["Total"], new CultureInfo("es-CO")),
                                 IdTransaccion = dr["IdTransaccion"].ToString()
                             }
@@ -87,8 +89,8 @@ namespace CapaDatos
                         {
                             objeto = new DashBoard()
                             {
-                                TotalCliente = Convert.ToInt32(dr["TotalCliente"]),
-                                TotalVenta = Convert.ToInt32(dr["TotalAlquiler"]),
+                                TotalCliente = Convert.ToInt32(dr["TotalUsuario"]),
+                                TotalAlquiler = Convert.ToInt32(dr["TotalAlquiler"]),
                                 TotalProducto = Convert.ToInt32(dr["TotalProducto"])
                             };
                         }

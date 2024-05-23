@@ -229,7 +229,7 @@
 
                                 $("<div>").addClass("card-footer p-2 pt-0 border-top-0 bg-transparent").append(
                                     $("<div>").addClass("d-grid gap-2").append(
-                                        @if (Session["Cliente"] != null)
+                                        @if (Session["Usuario"] != null)
                                         {
                                             @:$("<button>").addClass("btn btn-success mt-auto agregarcarrito").data("idproducto", element.IdProducto).text("Agregar al Carrito"),
                                         }

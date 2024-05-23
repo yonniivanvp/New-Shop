@@ -31,28 +31,28 @@ namespace CapaPresentacionAdmin.Controllers
         }
 
         [HttpGet]
-        public JsonResult ListarUsuarios()
+        public JsonResult ListarAdministrador()
         {
-            List<Usuario> oLista = new List<Usuario>();
+            List<Administrador> oLista = new List<Administrador>();
 
-            oLista = new CN_Usuarios().Listar();
+            oLista = new CN_Administrador().Listar();
 
             return Json(new { data = oLista }, JsonRequestBehavior.AllowGet);
         }
 
         [HttpPost]
-        public JsonResult GuardarUsuario(Usuario objeto)
+        public JsonResult GuardarAdministrador(Administrador objeto)
         {
             object resultado;
             string mensaje = string.Empty;
 
-            if (objeto.IdUsuario == 0)
+            if (objeto.IdAdministrador == 0)
             {
-                resultado = new CN_Usuarios().Registrar(objeto, out mensaje);
+                resultado = new CN_Administrador().Registrar(objeto, out mensaje);
             }
             else
             {
-                resultado = new CN_Usuarios().Editar(objeto, out mensaje);
+                resultado = new CN_Administrador().Editar(objeto, out mensaje);
             }
 
             return Json(new { resultado = resultado, mensaje = mensaje }, JsonRequestBehavior.AllowGet);
@@ -60,12 +60,12 @@ namespace CapaPresentacionAdmin.Controllers
 
 
         [HttpPost]
-        public JsonResult EliminarUsuario(int id)
+        public JsonResult EliminarAdministrador(int id)
         {
             bool respuesta = false;
             string mensaje = string.Empty;
 
-            respuesta = new CN_Usuarios().Eliminar(id, out mensaje);
+            respuesta = new CN_Administrador().Eliminar(id, out mensaje);
             return Json(new { resultado = respuesta, mensaje = mensaje }, JsonRequestBehavior.AllowGet);
 
         }
@@ -75,7 +75,7 @@ namespace CapaPresentacionAdmin.Controllers
         {
             List <Reporte> oLista = new List <Reporte>();
 
-            oLista = new CN_Reporte().Ventas(fechainicio, fechafin, idtransaccion);
+            oLista = new CN_Reporte().Alquiler(fechainicio, fechafin, idtransaccion);
 
             return Json(new { data = oLista }, JsonRequestBehavior.AllowGet);
         }
@@ -90,19 +90,21 @@ namespace CapaPresentacionAdmin.Controllers
 
 
         [HttpPost]
-        public FileResult ExportarVenta(string fechainicio, string fechafin, string idtransaccion) 
+        public FileResult ExportarAlquiler(string fechainicio, string fechafin, string idtransaccion) 
         {
             List<Reporte> oLista = new List<Reporte>();
-            oLista = new CN_Reporte().Ventas(fechainicio, fechafin, idtransaccion);
+            oLista = new CN_Reporte().Alquiler(fechainicio, fechafin, idtransaccion);
 
             DataTable dt = new DataTable();
 
             dt.Locale = new System.Globalization.CultureInfo("es-CO");
-            dt.Columns.Add("Fecha Venta", typeof(string));
+            dt.Columns.Add("Fecha Alquiler", typeof(string));
             dt.Columns.Add("Cliente", typeof(string));
             dt.Columns.Add("Producto", typeof(string));
             dt.Columns.Add("Precio", typeof(decimal));
             dt.Columns.Add("Cantidad", typeof(int));
+            dt.Columns.Add("Fecha Inicio", typeof(string));
+            dt.Columns.Add("Fecha Fin", typeof(string));
             dt.Columns.Add("Total", typeof(decimal));
             dt.Columns.Add("IdTransaccion", typeof(string));
 
@@ -110,11 +112,13 @@ namespace CapaPresentacionAdmin.Controllers
             {
                 dt.Rows.Add(new object[] 
                 { 
-                    rp.FechaVenta,
+                    rp.FechaAlquiler,
                     rp.Cliente,
                     rp.Producto,
                     rp.Precio,
                     rp.Cantidad,
+                    rp.FechaInicio,
+                    rp.FechaFin,
                     rp.Total,
                     rp.IdTransaccion
                 });
@@ -127,14 +131,12 @@ namespace CapaPresentacionAdmin.Controllers
                 using (MemoryStream stream = new MemoryStream())
                 {
                     wb.SaveAs(stream);
-                    return File(stream.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "ReporteVenta" + DateTime.Now.ToString() + "xlsx");
+                    return File(stream.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "ReporteAlquiler" + DateTime.Now.ToString() + "xlsx");
                 }
             }
 
 
         }
-
-
 
     }
 }

@@ -30,8 +30,8 @@
             <div class="card-body">
                 <div class="row">
                     <div class="col-sm-9">
-                        <h6>Cantidad Ventas</h6>
-                        <h6 id="totalventa">0</h6>
+                        <h6>Cantidad Alquilados</h6>
+                        <h6 id="totalalquiler">0</h6>
                     </div>
                     <div class="col-sm-3">
                         <i class="fas fa-shopping-bag fa-2x"></i>
@@ -67,7 +67,7 @@
     </div>
     <div class="card-body">
 
-        <form action="@Url.Action("ExportarVenta", "Home")" method="post">
+        <form action="@Url.Action("ExportarAlquiler", "Home")" method="post">
 
             <div class="row align-items-end">
                 <div class="col-sm-2">
@@ -114,10 +114,13 @@
             <table id="tabla" class="display cell-border" style="width:100%">
                 <thead>
                     <tr>
-                        <th>Fecha Venta</th>
+                        <th>Fecha Alquiler</th>
                         <th>Cliente</th>
                         <th>Producto</th>
                         <th>Precio</th>
+                        <th>Cantidad</th>
+                        <th>Fecha Inicio</th>
+                        <th>Fecha Fin</th>
                         <th>Total</th>
                         <th>ID Transaccion</th>
                     </tr>
@@ -152,7 +155,7 @@
             success: function (data) {
                 var objeto = data.resultado;
                 $("#totalcliente").text(objeto.TotalCliente)
-                $("#totalventas").text(objeto.TotalVenta)
+                $("#totalalquiler").text(objeto.TotalAlquiler)
                 $("#totalproducto").text(objeto.TotalProducto)
             }
         });
@@ -176,11 +179,13 @@
             },
             "columns":
                 [
-                    { "data": "FechaVenta" },
+                    { "data": "FechaAlquiler" },
                     { "data": "Cliente" },
                     { "data": "Producto" },
                     { "data": "Precio" },
                     { "data": "Cantidad" },
+                    { "data": "FechaInicio" },
+                    { "data": "FechaFin" },
                     { "data": "Total" },
                     { "data": "IdTransaccion" }
                 ],

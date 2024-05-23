@@ -113,7 +113,7 @@
             ordering: false,
             "ajax":
             {
-                url: "@Url.Action("ListarUsuarios", "Home")",
+                url: "@Url.Action("ListarAdministrador", "Home")",
                 type: "GET",
                 dataType: "json"
             },
@@ -158,7 +158,7 @@
 
             if (json != null)
             {
-                $("#txtid").val(json.IdUsuario);
+                $("#txtid").val(json.IdAdministrador);
                 $("#txtnombres").val(json.Nombres);
                 $("#txtapellidos").val(json.Apellidos);
                 $("#txtcorreo").val(json.Correo);
@@ -199,9 +199,9 @@
                 
             function () {
                 jQuery.ajax({
-                    url: '@Url.Action("EliminarUsuario", "Home")',
+                    url: '@Url.Action("EliminarAdministrador", "Home")',
                     type: 'POST',
-                    data: JSON.stringify({ id: data.IdUsuario }),
+                    data: JSON.stringify({ id: data.IdAdministrador }),
                     dataType: 'json',
                     contentType: 'application/json; charset=utf-8',
                     success: function (data) {
@@ -224,9 +224,9 @@
 
 
         function Guardar() {
-            var Usuario =
+            var Administrador =
             {
-                IdUsuario: $("#txtid").val(),
+                IdAdministrador: $("#txtid").val(),
                 Activo: $("#cboactivo").val() == 1 ? true : false,
                 Apellidos: $("#txtapellidos").val(),
                 Correo: $("#txtcorreo").val(),
@@ -234,9 +234,9 @@
             }
 
             jQuery.ajax({
-                url: '@Url.Action("GuardarUsuario", "Home")',
+                url: '@Url.Action("GuardarAdministrador", "Home")',
                 type: 'POST',
-                data: JSON.stringify({ objeto: Usuario }),
+                data: JSON.stringify({ objeto: Administrador }),
                 dataType: 'json',
                 contentType: 'application/json; charset=utf-8',
                 success: function (data)
@@ -245,11 +245,11 @@
                     $(".modal-body").LoadingOverlay("hide");
 
                     //Usuario Nuevo
-                    if (Usuario.IdUsuario == 0)
+                    if (Administrador.IdAdministrador == 0)
                     {
                         if (data.resultado != 0) {
-                            Usuario.IdUsuario = data.resultado;
-                            tabladata.row.add(Usuario).draw(false);
+                            Administrador.IdAdministrador = data.resultado;
+                            tabladata.row.add(Administrador).draw(false);
                             $("#FormModal").modal("hide");
 
                         } else
@@ -263,7 +263,7 @@
                     else
                     {
                         if (data.resultado) {
-                            tabladata.row(filaseleccionada).data(Usuario).draw(false);
+                            tabladata.row(filaseleccionada).data(Administrador).draw(false);
                             filaseleccionada = null;
                             $("#FormModal").modal("hide");
                         } else

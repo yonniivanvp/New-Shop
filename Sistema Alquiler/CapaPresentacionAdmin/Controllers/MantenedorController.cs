@@ -148,6 +148,7 @@ namespace CapaPresentacionAdmin.Controllers
 
             Producto oProducto = new Producto();
             oProducto = JsonConvert.DeserializeObject<Producto>(objeto);
+            oProducto.IdArrendatario = ((Administrador)Session["Administrador"]).IdAdministrador;
 
             decimal precio;
             if (decimal.TryParse(oProducto.PrecioTexto, System.Globalization.NumberStyles.AllowDecimalPoint, new CultureInfo("es-CO"), out precio))

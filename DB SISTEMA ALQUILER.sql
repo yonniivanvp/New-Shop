@@ -1,10 +1,39 @@
-CREATE DATABASE DBCARRITO
+CREATE DATABASE SISTEMA_ALQUILER
 GO
 
-USE DBCARRITO
+USE SISTEMA_ALQUILER
 GO
 
 --CREAR TABLAS--
+
+create table ADMINISTRADOR (
+    IdAdministrador int primary key identity,
+    Nombres varchar(100),
+    Apellidos varchar(100),
+    Correo varchar(100),
+    Clave varchar(150),
+    Reestablecer bit default 1,
+    Activo bit default 1,
+    FechaRegistro datetime default getdate()
+);
+
+create table USUARIO (
+    IdUsuario int primary key identity,
+    Nombres varchar(100),
+    Apellidos varchar(100),
+    Correo varchar(100),
+    Clave varchar(150),
+    Reestablecer bit default 1,
+    FechaRegistro datetime default getdate()
+);
+
+create table ARRENDADOR (
+    IdArrendador int primary key references USUARIO(IdUsuario)
+);
+
+create table ARRENDATARIO (
+    IdArrendatario int primary key references USUARIO(IdUsuario)
+);
 
 create table CATEGORIA (
     IdCategoria int primary key identity,
@@ -31,37 +60,25 @@ create table PRODUCTO (
     RutaImagen varchar(100),
     NombreImagen varchar(100),
     Activo bit default 1,
-    FechaRegistro datetime default getdate()
+    FechaRegistro datetime default getdate(),
+	IdArrendatario int references Arrendatario(IdArrendatario)
 );
 
-create table CLIENTE (
-    IdCliente int primary key identity,
-    Nombres varchar(100),
-    Apellidos varchar(100),
-    Correo varchar(100),
-    Clave varchar(150),
-    Reestablecer bit default 0,
-    FechaRegistro datetime default getdate()
+create table VALORACION(
+	IdProducto int references PRODUCTO(IdProducto),
+	IdArrendador int references ARRENDADOR(IdArrendador),
+	NumEstrellas int,
+	DescValoracion varchar(500),
+	PRIMARY KEY (IdProducto,IdArrendador) 
 );
 
 create table CARRITO (
     IdCarrito int primary key identity,
-    IdCliente int references CLIENTE(IdCliente),
+    IdArrendador int references ARRENDADOR(IdArrendador),
     IdProducto int references PRODUCTO(IdProducto),
     FechaInicio datetime,
     FechaFin datetime,
     Cantidad int
-);
-
-create table USUARIO (
-    IdUsuario int primary key identity,
-    Nombres varchar(100),
-    Apellidos varchar(100),
-    Correo varchar(100),
-    Clave varchar(150),
-    Reestablecer bit default 1,
-    Activo bit default 1,
-    FechaResigro datetime default getdate()
 );
 
 create table DEPARTAMENTO (
@@ -84,7 +101,7 @@ create table BARRIO (
 
 create table ALQUILER (
     IdAlquiler int primary key identity,
-    IdCliente int references CLIENTE(IdCliente),
+    IdArrendador int references ARRENDADOR(IdArrendador),
     TotalProducto int,
     MontoTotal decimal(10,2),
     Contacto varchar(50),
@@ -96,7 +113,7 @@ create table ALQUILER (
 );
 
 create table DETALLE_ALQUILER (
-    IdDetalleVenta int primary key identity,
+    IdDetalleAlquiler int primary key identity,
     IdAlquiler int references ALQUILER(IdAlquiler),
     IdProducto int references PRODUCTO(IdProducto),
     FechaInicio datetime,
@@ -107,11 +124,11 @@ create table DETALLE_ALQUILER (
 
 --INSERTAR DATOS A LA BASE DE DATOS
 
-select * from USUARIO;
-insert into USUARIO (Nombres, Apellidos, Correo, Clave) values 
-    ('Mariana', 'Vergara', 'maricanavergara@prueba.com', 'ecd71870d1963316a97e3ac3408c9835ad8cf0f3c1bc703527c30265534f75ae'),
-    ('Julian', 'Vanegas', 'julianvanega@prueba.com', 'ecd71870d1963316a97e3ac3408c9835ad8cf0f3c1bc703527c30265534f75ae'),
-	('Andres', 'Rodriguez', 'andresrodriguez@prueba.com', 'ecd71870d1963316a97e3ac3408c9835ad8cf0f3c1bc703527c30265534f75ae');
+select * from ADMINISTRADOR;
+insert into ADMINISTRADOR (Nombres, Apellidos, Correo, Clave, Reestablecer) values 
+    ('Mariana', 'Vergara', 'maricanavergara@prueba.com', 'ecd71870d1963316a97e3ac3408c9835ad8cf0f3c1bc703527c30265534f75ae', 0),
+    ('Julian', 'Vanegas', 'julianvanega@prueba.com', 'ecd71870d1963316a97e3ac3408c9835ad8cf0f3c1bc703527c30265534f75ae', 1),
+	('Andres', 'Rodriguez', 'andresrodriguez@prueba.com', 'ecd71870d1963316a97e3ac3408c9835ad8cf0f3c1bc703527c30265534f75ae', 0);
 
 select * from CATEGORIA;
 insert into CATEGORIA (Descripcion) values
@@ -171,8 +188,9 @@ insert into BARRIO(IdBarrio, Descripcion, IdCiudad, IdDepartamento) values
     ('030202', 'Nieva', '0302', '03');
 
 
-	--Procedimientos ALMACENADOS
-create procedure sp_RegistrarUsuario(
+------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------- PROCEDIMIENTO ALMACENADO PARA EL CRUD DE ADMINISTRADOR -----------------------------------------------
+create procedure sp_RegistrarAdmin(
     @Nombres varchar(100),
     @Apellidos varchar(100),
     @Correo varchar(100),
@@ -187,10 +205,10 @@ begin
     set @Resultado = 0;
 
     -- Verificar si el correo del usuario ya existe en la tabla USUARIO
-    if not exists (select * from USUARIO where Correo = @Correo)
+    if not exists (select * from ADMINISTRADOR where Correo = @Correo)
     begin
         -- Insertar un nuevo usuario en la tabla USUARIO
-        insert into USUARIO (Nombres, Apellidos, Correo, Clave, Activo)
+        insert into ADMINISTRADOR(Nombres, Apellidos, Correo, Clave, Activo)
         values (@Nombres, @Apellidos, @Correo, @Clave, @Activo);
 
         -- Obtener el identificador generado para el nuevo usuario
@@ -202,8 +220,8 @@ begin
 end;
 
 
-create procedure sp_EditarUsuario(
-    @IdUsuario int,
+create procedure sp_EditarAdmin(
+    @IdAdministrador int,
     @Nombres varchar(100),
     @Apellidos varchar(100),
     @Correo varchar(100),
@@ -217,15 +235,15 @@ begin
     set @Resultado = 0;
 
     -- Verificar si el correo del usuario ya existe en la tabla USUARIO, excluyendo el usuario actual
-    if not exists (select * from USUARIO where Correo = @Correo and IdUsuario != @IdUsuario)
+    if not exists (select * from USUARIO where Correo = @Correo and IdUsuario != @IdAdministrador)
     begin
         -- Actualizar los datos del usuario
-        update top (1) USUARIO
+        update top (1) ADMINISTRADOR
         set Nombres = @Nombres,
             Apellidos = @Apellidos,
             Correo = @Correo,
             Activo = @Activo
-        where IdUsuario = @IdUsuario;
+        where IdAdministrador = @IdAdministrador;
 
         -- Establecer el resultado como 1 para indicar que la actualización fue exitosa
         set @Resultado = 1;
@@ -236,6 +254,8 @@ begin
 end;
 
 
+--------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------- PROCEDIMIENTO ALMACENADO PARA EL CRUD DE CATEGORIA -----------------------------------------------
 create procedure sp_RegistrarCategoria(
     @Descripcion varchar(100),
     @Activo bit,
@@ -261,7 +281,6 @@ begin
         -- Establecer un mensaje indicando que la categoría ya existe
         set @Mensaje = 'La categoría ya existe';
 end;
-
 
 
 create procedure sp_EditarCategoria(
@@ -292,9 +311,6 @@ begin
         -- Establecer un mensaje indicando que la categoría ya existe
         set @Mensaje = 'La categoría ya existe';
 end;
- set @Mensaje = 'La categoria ya existe'
-end
-
 
 
 create procedure sp_EliminarCategoria (
@@ -325,7 +341,8 @@ begin
 end;
 
 
-
+----------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------- PROCEDIMIENTO ALMACENADO PARA EL CRUD DE MARCA -----------------------------------------------
 create procedure sp_RegistrarMarca (
     @Descripcion varchar(100),
     @Activo bit,
@@ -353,7 +370,6 @@ begin
         -- Establecer un mensaje indicando que la marca ya existe
         set @Mensaje = 'La marca ya existe';
 end;
-
 
 
 create procedure sp_EditarMarca (
@@ -389,7 +405,6 @@ begin
 end;
 
 
-
 create procedure sp_EliminarMarca (
   @IdMarca int,
   @Mensaje varchar(500) output,
@@ -418,7 +433,8 @@ begin
 end;
 
 
-
+-------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------- PROCEDIMIENTO ALMACENADO PARA EL CRUD DE PRODUCTO -----------------------------------------------
 create procedure sp_RegistrarProducto (
     @Nombre varchar(100),
     @Descripcion varchar(100),
@@ -428,7 +444,8 @@ create procedure sp_RegistrarProducto (
     @Stock int,
     @Activo bit,
     @Mensaje varchar(500) output,
-    @Resultado int output
+    @Resultado int output,
+	@IdArrendatario int
 )
 as
 begin  
@@ -439,8 +456,8 @@ begin
     if not exists (select * from PRODUCTO where Nombre = @Nombre)
     begin
         -- Insertar el nuevo producto en la tabla PRODUCTO
-        insert into PRODUCTO (Nombre, Descripcion, IdMarca, IdCategoria, Precio, Stock, Activo)
-        values (@Nombre, @Descripcion, @IdMarca, @IdCategoria, @Precio, @Stock, @Activo);
+        insert into PRODUCTO (Nombre, Descripcion, IdMarca, IdCategoria, Precio, Stock, Activo, IdArrendatario)
+        values (@Nombre, @Descripcion, @IdMarca, @IdCategoria, @Precio, @Stock, @Activo, @IdArrendatario);
 
         -- Obtener el ID del producto recién insertado
         set @Resultado = SCOPE_IDENTITY();
@@ -449,7 +466,6 @@ begin
         -- Establecer un mensaje indicando que el producto ya existe
         set @Mensaje = 'El producto ya existe';
 end;
-
 
 
 create procedure sp_EditarProducto (
@@ -462,7 +478,8 @@ create procedure sp_EditarProducto (
   @Stock int,
   @Activo bit,
   @Mensaje varchar(500) output,
-  @Resultado bit output
+  @Resultado bit output,
+  @IdArrendatario int
 )
 as
 begin
@@ -483,7 +500,8 @@ begin
       IdCategoria = @IdCategoria,
       Precio = @Precio,
       Stock = @Stock,
-      Activo = @Activo
+      Activo = @Activo,
+	  IdArrendatario = @IdArrendatario
     where IdProducto = @IdProducto;
 
     -- Establecer el resultado como 1 para indicar que la actualización fue exitosa
@@ -493,7 +511,6 @@ begin
     -- Establecer un mensaje indicando que el producto ya existe
     set @Mensaje = 'El producto ya existe';
 end;
-
 
 
 create procedure sp_ActualizarRutaImagen (
@@ -508,7 +525,6 @@ begin
       NombreImagen = @nombreImagen
   where IdProducto = @idProducto;
 end;
-
 
 
 create proc sp_EliminarProducto (
@@ -539,13 +555,14 @@ begin
 end;
 
 
-
+----------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------- PROCEDIMIENTO ALMACENADO PARA GENERACION DE REPORTES -----------------------------------------------
 create proc sp_ReporteDashdoard
 as
 begin
       select
         -- Contar el número total de clientes en la tabla CLIENTE
-        (select count(*) from CLIENTE) [TotalCliente],
+        (select count(*) from USUARIO) [TotalUsuario],
 
         -- Sumar la cantidad total de alquileres en la tabla DETALLE_ALQUILER
         (select isnull(sum(CANTIDAD), 0) from DETALLE_ALQUILER) [TotalAlquiler],
@@ -553,7 +570,6 @@ begin
         -- Contar el número total de productos en la tabla PRODUCTO
         (select count(*) from PRODUCTO) [TotalProducto]
 end;
-
 
 
 create proc sp_ReporteAlquiler(
@@ -568,23 +584,25 @@ begin
 
     -- Seleccionar y devolver el informe de ventas
     select 
-        convert(char(10), v.FechaAlquiler, 103) [FechaAlquiler],
+        convert(char(10), a.FechaAlquiler, 103) [FechaAlquiler],
         
-        concat(c.Nombres, ' ', c.Apellidos) [Cliente], p.Nombre [Producto], p.Precio, dv.Cantidad, dv.FechaInicio, dv.FechaFin, dv.Total, v.IdTransaccion
+        concat(c.Nombres, ' ', c.Apellidos) [Cliente], p.Nombre [Producto], p.Precio, dv.Cantidad, dv.FechaInicio, dv.FechaFin, dv.Total, a.IdTransaccion
     from DETALLE_ALQUILER dv
     inner join PRODUCTO p on p.IdProducto = dv.IdProducto
-    inner join ALQUILER v on v.IdAlquiler = dv.IdAlquiler
-    inner join CLIENTE c on c.IdCliente = v.IdCliente
+    inner join ALQUILER a on a.IdAlquiler = dv.IdAlquiler
+    inner join USUARIO c on c.IdUsuario = a.IdArrendador
     where 
         -- Filtrar las fechas de alquiler entre la fecha de inicio y la fecha de fin proporcionadas
-        convert(date, v.FechaAlquiler) between @fechainicio and @fechafin
+        convert(date, a.FechaAlquiler) between @fechainicio and @fechafin
         
         -- Filtrar por el ID de la transacción, si se proporciona
-        and v.IdTransaccion = iif(@idtransaccion = '', v.IdTransaccion, @idtransaccion)
+        and a.IdTransaccion = iif(@idtransaccion = '', a.IdTransaccion, @idtransaccion)
 end;
 
 
-create proc sp_RegistrarCliente(
+-------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------- PROCEDIMIENTO ALMACENADO PARA EL CRUD DE USUARIOS -----------------------------------------------
+create proc sp_RegistrarUsuario(
     @Nombres varchar(100),
     @Apellidos varchar(100),
     @Correo varchar(100),
@@ -597,15 +615,37 @@ begin
     -- Inicializar el resultado en 0
     set @Resultado = 0;
 
-    -- Verificar si el correo ya existe en la tabla CLIENTE
-    if not exists (select * from CLIENTE where Correo = @Correo)
+    -- Verificar si el correo ya existe en la tabla USUARIO
+    if not exists (select * from USUARIO where Correo = @Correo)
     begin
-        -- Insertar un nuevo cliente en la tabla CLIENTE
-        insert into CLIENTE (Nombres, Apellidos, Correo, Clave, Reestablecer) values
-        (@Nombres, @Apellidos, @Correo, @Clave, 0);
+        begin try
+            -- Iniciar transacción
+            begin transaction;
 
-        -- Establecer el resultado con el ID del cliente recién insertado
-        set @Resultado = scope_identity();
+            -- Insertar un nuevo usuario en la tabla USUARIO
+            insert into USUARIO(Nombres, Apellidos, Correo, Clave, Reestablecer) 
+            values (@Nombres, @Apellidos, @Correo, @Clave, 0);
+
+            -- Capturar el ID del usuario recién insertado
+            set @Resultado = scope_identity();
+
+            -- Insertar un nuevo registro en la tabla ARRENDADOR
+            insert into ARRENDADOR (IdArrendador) values (@Resultado);
+
+            -- Insertar un nuevo registro en la tabla ARRENDATARIO
+            insert into ARRENDATARIO (IdArrendatario) values (@Resultado);
+
+            -- Confirmar la transacción
+            commit transaction;
+        end try
+        begin catch
+            -- Revertir la transacción en caso de error
+            rollback transaction;
+            -- Establecer un mensaje de error
+            set @Mensaje = error_message();
+            -- Restablecer el resultado a 0 para indicar fallo
+            set @Resultado = 0;
+        end catch
     end
     else
         -- Establecer un mensaje indicando que el correo del usuario ya existe
@@ -613,8 +653,10 @@ begin
 end;
 
 
+------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------- PROCEDIMIENTO ALMACENADO PARA EL CRUD DE CARRITO -----------------------------------------------
 create proc sp_ExisteCarrito(
-    @IdCliente int,
+    @IdArrendador int,
     @IdProducto int,
     @Resultado bit output
 )
@@ -622,7 +664,7 @@ as
 begin
     -- Verificar si existe un carrito con el IdCliente e IdProducto especificados
     if exists (
-        select * from CARRITO where IdCliente = @IdCliente and IdProducto = @IdProducto
+        select * from CARRITO where IdArrendador = @IdArrendador and IdProducto = @IdProducto
     )
         -- Si existe, establecer el resultado en 1 (true)
         set @Resultado = 1
@@ -635,7 +677,7 @@ end;
 
 create proc sp_OperacionCarrito
 (
-    @IdCliente int,
+    @IdArrendador int,
     @IdProducto int,
     @FechaInicio datetime,
     @FechaFin datetime,
@@ -650,7 +692,7 @@ begin
     set @Mensaje = '';
 
     -- Declarar una variable para verificar si el carrito ya existe
-    declare @existecarrito bit = iif(exists(select * from CARRITO where IdCliente = @IdCliente and IdProducto = @IdProducto), 1, 0);
+    declare @existecarrito bit = iif(exists(select * from CARRITO where IdArrendador = @IdArrendador and IdProducto = @IdProducto), 1, 0);
 
     -- Obtener el stock del producto
     declare @stockproducto int = (select Stock from PRODUCTO where IdProducto = @IdProducto);
@@ -667,10 +709,10 @@ begin
             begin
                 -- Si el carrito ya existe, actualizar la cantidad y las fechas
                 if (@existecarrito = 1)
-                    update CARRITO set Cantidad = Cantidad + 1, FechaInicio = @FechaInicio, FechaFin = @FechaFin where IdCliente = @IdCliente and IdProducto = @IdProducto;
+                    update CARRITO set Cantidad = Cantidad + 1, FechaInicio = @FechaInicio, FechaFin = @FechaFin where IdArrendador = @IdArrendador and IdProducto = @IdProducto;
                 -- Si el carrito no existe, insertar un nuevo registro
                 else
-                    insert into CARRITO (IdCliente, IdProducto, Cantidad, FechaInicio, FechaFin) values (@IdCliente, @IdProducto, 1, @FechaInicio, @FechaFin);
+                    insert into CARRITO (IdArrendador, IdProducto, Cantidad, FechaInicio, FechaFin) values (@IdArrendador, @IdProducto, 1, @FechaInicio, @FechaFin);
                 
                 -- Actualizar el stock del producto
                 update PRODUCTO set Stock = Stock - 1 where IdProducto = @IdProducto;
@@ -685,7 +727,7 @@ begin
         else
         begin
             -- Si se va a restar del carrito
-            update CARRITO set Cantidad = Cantidad - 1 where IdCliente = @IdCliente and IdProducto = @IdProducto;
+            update CARRITO set Cantidad = Cantidad - 1 where IdArrendador = @IdArrendador and IdProducto = @IdProducto;
             update PRODUCTO set Stock = Stock + 1 where IdProducto = @IdProducto;
         end
 
@@ -702,7 +744,7 @@ end;
 
 
 create function fn_obtenerCarritoCliente(
-    @idcliente int
+    @IdArrendador int
 )
 returns table
 as
@@ -721,41 +763,12 @@ as
         from CARRITO c
         inner join PRODUCTO p on p.IdProducto = c.IdProducto
         inner join MARCA m on m.IdMarca = p.IdMarca
-        where c.IdCliente = @idcliente                        -- Filtrar por el ID del cliente
-    );
+        where c.IdArrendador = @IdArrendador                        -- Filtrar por el ID del cliente
+);
 
-
-
-CREATE PROC sp_EliminarCarrito(
-    @IdCliente INT,
-    @IdProducto INT,
-    @Resultado BIT OUTPUT
-)
-AS
-BEGIN
-
-    SET @Resultado = 1
-
-    DECLARE @cantidadproducto INT = (SELECT Cantidad FROM CARRITO WHERE IdCliente = @IdCliente AND IdProducto = @IdProducto)
-
-    BEGIN TRY
-
-        BEGIN TRANSACTION OPERACION
-
-            UPDATE PRODUCTO SET Stock = Stock + @cantidadproducto WHERE IdProducto = @IdProducto
-            DELETE TOP (1) FROM CARRITO WHERE IdCliente = @IdCliente AND IdProducto = @IdProducto
-
-            COMMIT TRANSACTION OPERACION
-
-    END TRY
-    BEGIN CATCH
-        SET @Resultado = 0
-        ROLLBACK TRANSACTION OPERACION
-    END CATCH
-END
 
 CREATE PROC sp_ActualizarFechaProductoCarrito(
-    @IdCliente INT,
+    @IdArrendador INT,
     @IdProducto INT,
     @FechaInicio DATE,
     @FechaFin DATE,
@@ -783,7 +796,7 @@ BEGIN
         RETURN;
     END
 
-    DECLARE @existecarrito BIT = IIF(EXISTS(SELECT * FROM CARRITO WHERE IdCliente = @IdCliente AND IdProducto = @IdProducto), 1, 0);
+    DECLARE @existecarrito BIT = IIF(EXISTS(SELECT * FROM CARRITO WHERE IdArrendador = @IdArrendador AND IdProducto = @IdProducto), 1, 0);
 
     BEGIN TRY
         BEGIN TRANSACTION OPERACION;
@@ -793,7 +806,7 @@ BEGIN
             UPDATE CARRITO
             SET FechaInicio = @FechaInicio,
                 FechaFin = @FechaFin
-            WHERE IdCliente = @IdCliente
+            WHERE IdArrendador = @IdArrendador
             AND IdProducto = @IdProducto;
         END
         ELSE
@@ -812,6 +825,37 @@ BEGIN
 END;
 
 
+CREATE PROC sp_EliminarCarrito(
+    @IdArrendador INT,
+    @IdProducto INT,
+    @Resultado BIT OUTPUT
+)
+AS
+BEGIN
+
+    SET @Resultado = 1
+
+    DECLARE @cantidadproducto INT = (SELECT Cantidad FROM CARRITO WHERE IdArrendador = @IdArrendador AND IdProducto = @IdProducto)
+
+    BEGIN TRY
+
+        BEGIN TRANSACTION OPERACION
+
+            UPDATE PRODUCTO SET Stock = Stock + @cantidadproducto WHERE IdProducto = @IdProducto
+            DELETE TOP (1) FROM CARRITO WHERE IdArrendador = @IdArrendador AND IdProducto = @IdProducto
+
+            COMMIT TRANSACTION OPERACION
+
+    END TRY
+    BEGIN CATCH
+        SET @Resultado = 0
+        ROLLBACK TRANSACTION OPERACION
+    END CATCH
+END;
+
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------- PROCEDIMIENTO ALMACENADO PARA EL CRUD DE DETALLE ALQUILER -----------------------------------------------
 CREATE TYPE [dbo].[EDetalle_Alquiler] AS TABLE(
     [IdProducto] int NULL,
     [Cantidad] int NULL,
@@ -822,7 +866,7 @@ CREATE TYPE [dbo].[EDetalle_Alquiler] AS TABLE(
 
 
 CREATE PROCEDURE usp_RegistrarAlquiler(
-    @IdCliente int,
+    @IdArrendador int,
     @TotalProducto int,
     @MontoTotal decimal(18,2),
     @Contacto varchar(100),
@@ -843,15 +887,15 @@ BEGIN
 
         BEGIN TRANSACTION registro
 
-        INSERT INTO ALQUILER(IdCliente, TotalProducto, MontoTotal, Contacto, IdBarrio, Telefono, Direccion, IdTransaccion)
-        VALUES(@IdCliente, @TotalProducto, @MontoTotal, @Contacto, @IdBarrio, @Telefono, @Direccion, @IdTransaccion)
+        INSERT INTO ALQUILER(IdArrendador, TotalProducto, MontoTotal, Contacto, IdBarrio, Telefono, Direccion, IdTransaccion)
+        VALUES(@IdArrendador, @TotalProducto, @MontoTotal, @Contacto, @IdBarrio, @Telefono, @Direccion, @IdTransaccion)
 
         SET @idalquiler = SCOPE_IDENTITY()
 
         insert into DETALLE_ALQUILER (IdAlquiler, IdProducto, Cantidad, FechaInicio, FechaFin, Total)
 		select @idalquiler, IdProducto, Cantidad, fechaInicio, fechaFin, Total from @DetalleAlquiler
 
-		delete from CARRITO where IdCliente = @IdCliente
+		delete from CARRITO where IdArrendador = @IdArrendador
 
 		commit transaction registro
   END TRY
@@ -863,7 +907,7 @@ BEGIN
 END
 
 Create Function fn_ListarAlquiler(
-@idcliente int
+@IdArrendador int
 )
 RETURNS TABLE
 AS 
@@ -872,8 +916,9 @@ RETURN
 	SELECT P.RutaImagen, P.NombreImagen, P.Nombre, P.Precio, DA.Cantidad, DA.FechaInicio, DA.FechaFin, DA.Total, A.IdTransaccion FROM DETALLE_ALQUILER DA
 	INNER JOIN PRODUCTO P ON P.IdProducto = DA.IdProducto
 	INNER JOIN ALQUILER A ON A.IdAlquiler = DA.IdAlquiler
-	WHERE A.IdCliente = @idcliente
+	WHERE A.IdArrendador = @IdArrendador
 );
 
 
 select *from CLIENTE
+select *from ALQUILER

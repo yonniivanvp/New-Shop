@@ -12,34 +12,34 @@ namespace CapaNegocio
     {
         private CD_Carrito objCapaDato = new CD_Carrito();
 
-        public bool ExisteCarrito(int idcliente, int idproducto)
+        public bool ExisteCarrito(int idusuario, int idproducto)
         {
-            return objCapaDato.ExisteCarrito(idcliente, idproducto);
+            return objCapaDato.ExisteCarrito(idusuario, idproducto);
         }
 
-        public bool OperacionCarrito(int idcliente, int idproducto, string fechainicio, string fechafin, bool sumar, out string Mensaje)
+        public bool OperacionCarrito(int idusuario, int idproducto, string fechainicio, string fechafin, bool sumar, out string Mensaje)
         {
-            return objCapaDato.OperacionCarrito(idcliente, idproducto, fechainicio, fechafin, sumar, out Mensaje);
+            return objCapaDato.OperacionCarrito(idusuario, idproducto, fechainicio, fechafin, sumar, out Mensaje);
         }
 
-        public bool ActualizarFechaProductoCarrito(int idCliente, int idProducto, string fechaInicio, string fechaFin, out string mensaje)
+        public bool ActualizarFechaProductoCarrito(int idUsuario, int idProducto, string fechaInicio, string fechaFin, out string mensaje)
         {
-            return objCapaDato.ActualizarFechaProductoCarrito(idCliente, idProducto, fechaInicio, fechaFin, out mensaje);
+            return objCapaDato.ActualizarFechaProductoCarrito(idUsuario, idProducto, fechaInicio, fechaFin, out mensaje);
         }
 
-        public int CantidadEnCarrito(int idcliente)
+        public int CantidadEnCarrito(int idusuario)
         {
-            return objCapaDato.CantidadEnCarrito(idcliente);
+            return objCapaDato.CantidadEnCarrito(idusuario);
         }
 
-        public List<Carrito> ListarProducto(int idcliente)
+        public List<Carrito> ListarProducto(int idusuario)
         {
-            return objCapaDato.ListarProducto(idcliente);
+            return objCapaDato.ListarProducto(idusuario);
         }
 
-        public bool EliminarCarrito(int idcliente, int idproducto)
+        public bool EliminarCarrito(int idusuario, int idproducto)
         {
-            return objCapaDato.EliminarCarrito(idcliente, idproducto);
+            return objCapaDato.EliminarCarrito(idusuario, idproducto);
         }
 
 

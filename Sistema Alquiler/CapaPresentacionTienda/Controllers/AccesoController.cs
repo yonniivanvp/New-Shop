@@ -32,7 +32,7 @@ namespace CapaPresentacionTienda.Controllers
 
 
         [HttpPost]
-        public ActionResult Registrar(Cliente objeto)
+        public ActionResult Registrar(Usuario objeto)
         {
             int resultado;
             string mensaje = string.Empty;
@@ -47,7 +47,7 @@ namespace CapaPresentacionTienda.Controllers
                 return View();
             }
 
-            resultado = new CN_Cliente().Registrar(objeto, out mensaje);
+            resultado = new CN_Usuarios().Registrar(objeto, out mensaje);
 
             if (resultado > 0)
             {
@@ -67,26 +67,26 @@ namespace CapaPresentacionTienda.Controllers
         [HttpPost]
         public ActionResult Index(string correo, string clave)
         {
-            Cliente oCliente = null;
+            Usuario oUsuario = null;
 
-            oCliente = new CN_Cliente().Listar().Where(item => item.Correo == correo && item.Clave == CN_Recursos.ConvertirSha256(clave)).FirstOrDefault();
+            oUsuario = new CN_Usuarios().Listar().Where(item => item.Correo == correo && item.Clave == CN_Recursos.ConvertirSha256(clave)).FirstOrDefault();
 
-            if (oCliente == null)
+            if (oUsuario == null)
             {
                 ViewBag.Error = "Correo o contraseña no son correctas";
                 return View();
             }
             else 
             {
-                if (oCliente.Reestablecer)
+                if (oUsuario.Reestablecer)
                 {
-                    TempData["IdCliente"] = oCliente.IdCliente;
+                    TempData["IdUsuario"] = oUsuario.IdUsuario;
                     return RedirectToAction("CambiarClave", "Acceso");
                 }
                 else 
                 {
-                    FormsAuthentication.SetAuthCookie(oCliente.Correo, false);
-                    Session["Cliente"] = oCliente;
+                    FormsAuthentication.SetAuthCookie(oUsuario.Correo, false);
+                    Session["Usuario"] = oUsuario;
                     ViewBag.Error = null;
                     return RedirectToAction("Index", "Tienda");
                 }
@@ -98,18 +98,18 @@ namespace CapaPresentacionTienda.Controllers
         [HttpPost]
         public ActionResult Reestablecer(string correo)
         {
-            Cliente cliente = new Cliente();
+            Usuario usuario = new Usuario();
 
-            cliente = new CN_Cliente().Listar().Where(item => item.Correo == correo).FirstOrDefault();
+            usuario = new CN_Usuarios().Listar().Where(item => item.Correo == correo).FirstOrDefault();
 
-            if (cliente == null)
+            if (usuario == null)
             {
-                ViewBag.Error = "No se encontró un cliente relacionado a ese correo";
+                ViewBag.Error = "No se encontró un usuario relacionado a ese correo";
                 return View();
             }
 
             string mensaje = string.Empty;
-            bool respuesta = new CN_Cliente().ReestablecerClave(cliente.IdCliente, correo, out mensaje);
+            bool respuesta = new CN_Usuarios().ReestablecerClave(usuario.IdUsuario, correo, out mensaje);
 
             if (respuesta)
             {
@@ -125,21 +125,21 @@ namespace CapaPresentacionTienda.Controllers
 
 
         [HttpPost]
-        public ActionResult CambiarClave(string idcliente, string claveactual, string nuevaclave, string confirmaclave)
+        public ActionResult CambiarClave(string idusuario, string claveactual, string nuevaclave, string confirmaclave)
         {
-            Cliente oCliente = new Cliente();
-            oCliente = new CN_Cliente().Listar().Where(u => u.IdCliente == int.Parse(idcliente)).FirstOrDefault();
+            Usuario oCliente = new Usuario();
+            oCliente = new CN_Usuarios().Listar().Where(u => u.IdUsuario == int.Parse(idusuario)).FirstOrDefault();
 
             if (oCliente.Clave != CN_Recursos.ConvertirSha256(claveactual))
             {
-                TempData["IdCliente"] = idcliente;
+                TempData["IdUsuario"] = idusuario;
                 ViewData["vclave"] = "";
                 ViewBag.Error = "La contraseña actual no es correcta";
                 return View();
             }
             else if (nuevaclave != confirmaclave)
             {
-                TempData["IdCliente"] = idcliente;
+                TempData["IdUsuario"] = idusuario;
                 ViewData["vclave"] = claveactual;
                 ViewBag.Error = "Las contraseñas no coinciden";
                 return View();
@@ -150,7 +150,7 @@ namespace CapaPresentacionTienda.Controllers
 
             string mensaje = string.Empty;
 
-            bool respuesta = new CN_Cliente().CambiarClave(int.Parse(idcliente), nuevaclave, out mensaje);
+            bool respuesta = new CN_Usuarios().CambiarClave(int.Parse(idusuario), nuevaclave, out mensaje);
 
             if (respuesta)
             {
@@ -158,7 +158,7 @@ namespace CapaPresentacionTienda.Controllers
             }
             else
             {
-                TempData["IdCliente"] = idcliente;
+                TempData["IdUsuario"] = idusuario;
                 ViewBag.Error = mensaje;
                 return View();
             }
@@ -167,7 +167,7 @@ namespace CapaPresentacionTienda.Controllers
 
         public ActionResult CerrarSesion()
         {
-            Session["Cliente"] = null;
+            Session["Usuario"] = null;
             FormsAuthentication.SignOut();
             return RedirectToAction("Index", "Acceso");
         }

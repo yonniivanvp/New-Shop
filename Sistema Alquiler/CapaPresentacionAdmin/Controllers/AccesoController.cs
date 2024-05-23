@@ -31,21 +31,22 @@ namespace CapaPresentacionAdmin.Controllers
         [HttpPost]
         public ActionResult Index(string correo, string clave)
         {
-            Usuario oUsuario = new Usuario();
-            oUsuario = new CN_Usuarios().Listar().Where(u => u.Correo == correo && u.Clave == CN_Recursos.ConvertirSha256(clave)).FirstOrDefault();
-            if (oUsuario == null) 
+            Administrador oAdministrador = new Administrador();
+            oAdministrador = new CN_Administrador().Listar().Where(u => u.Correo == correo && u.Clave == CN_Recursos.ConvertirSha256(clave)).FirstOrDefault();
+            if (oAdministrador == null) 
             {
                 ViewBag.Error = "Correo o contraseña incorrecto";
                 return View();
             }else 
             {
-                if (oUsuario.Reestablecer) 
+                if (oAdministrador.Reestablecer) 
                 {
-                    TempData["IdUsuario"] = oUsuario.IdUsuario;
+                    TempData["IdAdministrador"] = oAdministrador.IdAdministrador;
                     return RedirectToAction("CambiarClave");
                 }
 
-                FormsAuthentication.SetAuthCookie(oUsuario.Correo, false);
+                FormsAuthentication.SetAuthCookie(oAdministrador.Correo, false);
+                Session["Administrador"] = oAdministrador;
                 ViewBag.Error = null;
                 return RedirectToAction("Index", "Home");
             }
@@ -53,20 +54,20 @@ namespace CapaPresentacionAdmin.Controllers
         }
 
         [HttpPost]
-        public ActionResult CambiarClave(string idusuario, string claveactual, string nuevaclave, string confirmarclave)
+        public ActionResult CambiarClave(string idadministrador, string claveactual, string nuevaclave, string confirmarclave)
         {
-            Usuario oUsuario = new Usuario();
-            oUsuario = new CN_Usuarios().Listar().Where(u => u.IdUsuario == int.Parse(idusuario)).FirstOrDefault();
+            Administrador oAdministrador = new Administrador();
+            oAdministrador = new CN_Administrador().Listar().Where(u => u.IdAdministrador == int.Parse(idadministrador)).FirstOrDefault();
 
-            if (oUsuario.Clave != CN_Recursos.ConvertirSha256(claveactual))
+            if (oAdministrador.Clave != CN_Recursos.ConvertirSha256(claveactual))
             {
-                TempData["IdUsuario"] = idusuario;
+                TempData["IdAdministrador"] = idadministrador;
                 ViewData["vclave"] = "";
                 ViewBag.Error = "La contraseña actual no es correcta";
                 return View();
             } else if (nuevaclave != confirmarclave)
             {
-                TempData["IdUsuario"] = idusuario;
+                TempData["IdAdministrador"] = idadministrador;
                 ViewData["vclave"] = claveactual;
                 ViewBag.Error = "Las contraseñas no coinciden";
                 return View();
@@ -77,7 +78,7 @@ namespace CapaPresentacionAdmin.Controllers
 
             string mensaje = string.Empty;
 
-            bool respuesta = new CN_Usuarios().CambiarClave(int.Parse(idusuario), nuevaclave, out mensaje);
+            bool respuesta = new CN_Administrador().CambiarClave(int.Parse(idadministrador), nuevaclave, out mensaje);
 
             if (respuesta)
             {
@@ -85,7 +86,7 @@ namespace CapaPresentacionAdmin.Controllers
             }
             else 
             {
-                TempData["IdUsuario"] = idusuario;
+                TempData["IdAdministrador"] = idadministrador;
                 ViewBag.Error = mensaje;
                 return View();
             }
@@ -95,18 +96,18 @@ namespace CapaPresentacionAdmin.Controllers
         [HttpPost]
         public ActionResult Reestablecer(string correo) 
         {
-            Usuario ousuario = new Usuario();
+            Administrador oadministrador = new Administrador();
 
-            ousuario = new CN_Usuarios().Listar().Where(item => item.Correo == correo).FirstOrDefault();
+            oadministrador = new CN_Administrador().Listar().Where(item => item.Correo == correo).FirstOrDefault();
 
-            if (ousuario == null)
+            if (oadministrador == null)
             {
                 ViewBag.Error = "No se encontró un usuario relacionado a ese correo";
                 return View();
             }
 
             string mensaje = string.Empty;
-            bool respuesta = new CN_Usuarios().ReestablecerClave(ousuario.IdUsuario, correo, out mensaje);
+            bool respuesta = new CN_Administrador().ReestablecerClave(oadministrador.IdAdministrador, correo, out mensaje);
 
             if (respuesta)
             {
@@ -123,6 +124,7 @@ namespace CapaPresentacionAdmin.Controllers
 
         public ActionResult CerrarSesion()
         {
+            Session["Administrador"] = null;
             FormsAuthentication.SignOut();
             return RedirectToAction("Index", "Acceso");
         }

@@ -5,7 +5,7 @@ namespace CapaEntidad
     public class Alquiler
     {
         public int IdAlquiler { get; set; }
-        public int IdCliente { get; set; }
+        public int IdArrendador { get; set; }
         public int TotalProducto { get; set; }
         public decimal MontoTotal { get; set; }
         public string Contacto { get; set; }

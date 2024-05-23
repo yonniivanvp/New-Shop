@@ -97,8 +97,8 @@ namespace CapaPresentacionTienda.Controllers
         [HttpPost]
         public JsonResult AgregarCarrito(int idproducto)
         {
-            int idcliente = ((Cliente)Session["Cliente"]).IdCliente;
-            bool existe = new CN_Carrito().ExisteCarrito(idcliente, idproducto);
+            int idusuario = ((Usuario)Session["Usuario"]).IdUsuario;
+            bool existe = new CN_Carrito().ExisteCarrito(idusuario, idproducto);
             bool respuesta = false;
 
             string mensaje = string.Empty;
@@ -110,7 +110,7 @@ namespace CapaPresentacionTienda.Controllers
             {
                 string fechainicio = DateTime.Now.ToString();
                 string fechafin = DateTime.Now.ToString();
-                respuesta = new CN_Carrito().OperacionCarrito(idcliente, idproducto, fechainicio, fechafin, true, out mensaje);
+                respuesta = new CN_Carrito().OperacionCarrito(idusuario, idproducto, fechainicio, fechafin, true, out mensaje);
             }
 
             return Json(new { respuesta = respuesta, mensaje }, JsonRequestBehavior.AllowGet);
@@ -120,21 +120,21 @@ namespace CapaPresentacionTienda.Controllers
         [HttpGet]
         public JsonResult CantidadEnCarrito()
         {
-            int idcliente = ((Cliente)Session["Cliente"]).IdCliente;
-            int cantidad = new CN_Carrito().CantidadEnCarrito(idcliente);
+            int idusuario = ((Usuario)Session["Usuario"]).IdUsuario;
+            int cantidad = new CN_Carrito().CantidadEnCarrito(idusuario);
             return Json(new { cantidad = cantidad }, JsonRequestBehavior.AllowGet);
         }
 
         [HttpPost]
         public JsonResult ListarProductosCarrito()
         {
-            int idcliente = ((Cliente)Session["Cliente"]).IdCliente;
+            int idusuario = ((Usuario)Session["Usuario"]).IdUsuario;
 
             List<Carrito> oLista = new List<Carrito>();
 
             bool conversion;
 
-            oLista = new CN_Carrito().ListarProducto(idcliente).Select(oc => new Carrito() {
+            oLista = new CN_Carrito().ListarProducto(idusuario).Select(oc => new Carrito() {
                 oProducto = new Producto() {
                     IdProducto = oc.oProducto.IdProducto,
                     Nombre = oc.oProducto.Nombre,
@@ -158,11 +158,11 @@ namespace CapaPresentacionTienda.Controllers
         [HttpPost]
         public JsonResult OperacionCarrito(int idproducto, bool sumar, string fechainicio, string fechafin)
         {
-            int idcliente = ((Cliente)Session["Cliente"]).IdCliente;
+            int idusuario = ((Usuario)Session["Usuario"]).IdUsuario;
             bool respuesta = false;
             string mensaje = string.Empty;
 
-            respuesta = new CN_Carrito().OperacionCarrito(idcliente, idproducto, fechainicio, fechafin, sumar, out mensaje);
+            respuesta = new CN_Carrito().OperacionCarrito(idusuario, idproducto, fechainicio, fechafin, sumar, out mensaje);
 
             return Json(new { respuesta = respuesta, mensaje }, JsonRequestBehavior.AllowGet);
         }
@@ -170,11 +170,11 @@ namespace CapaPresentacionTienda.Controllers
         [HttpPost]
         public JsonResult ActualizarFechaProductoCarrito(int idproducto, string fechainicio, string fechafin)
         {
-            int idcliente = ((Cliente)Session["Cliente"]).IdCliente;
+            int idusuario = ((Usuario)Session["Usuario"]).IdUsuario;
             bool respuesta = false;
             string mensaje = string.Empty;
 
-            respuesta = new CN_Carrito().ActualizarFechaProductoCarrito(idcliente, idproducto, fechainicio, fechafin, out mensaje);
+            respuesta = new CN_Carrito().ActualizarFechaProductoCarrito(idusuario, idproducto, fechainicio, fechafin, out mensaje);
 
             return Json(new { respuesta = respuesta, mensaje }, JsonRequestBehavior.AllowGet);
         }
@@ -183,13 +183,13 @@ namespace CapaPresentacionTienda.Controllers
         [HttpPost]
         public JsonResult EliminarCarrito(int idproducto)
         {
-            int idcliente = ((Cliente)Session["Cliente"]).IdCliente;
+            int idusuario = ((Usuario)Session["Usuario"]).IdUsuario;
 
             bool respuesta = false;
 
             string mensaje = string.Empty;
 
-            respuesta = new CN_Carrito().EliminarCarrito(idcliente, idproducto);
+            respuesta = new CN_Carrito().EliminarCarrito(idusuario, idproducto);
 
             return Json(new { respuesta = respuesta, mensaje }, JsonRequestBehavior.AllowGet);
         }
@@ -325,7 +325,7 @@ namespace CapaPresentacionTienda.Controllers
             };
 
             oAlquiler.MontoTotal = total;
-            oAlquiler.IdCliente = ((Cliente)Session["Cliente"]).IdCliente;
+            oAlquiler.IdArrendador = ((Usuario)Session["Usuario"]).IdUsuario;
 
             TempData["Alquiler"] = oAlquiler;
             TempData["DetalleAlquiler"] = detalle_alquiler;
@@ -371,13 +371,13 @@ namespace CapaPresentacionTienda.Controllers
 
         public ActionResult MiAlquiler()
         {
-            int idcliente = ((Cliente)Session["Cliente"]).IdCliente;
+            int idusuario = ((Usuario)Session["Usuario"]).IdUsuario;
 
             List<DetalleAlquiler> oLista = new List<DetalleAlquiler>();
 
             bool conversion;
 
-            oLista = new CN_Alquiler().ListarAlquiler(idcliente).Select(oc => new DetalleAlquiler()
+            oLista = new CN_Alquiler().ListarAlquiler(idusuario).Select(oc => new DetalleAlquiler()
             {
                 oProducto = new Producto()
                 {

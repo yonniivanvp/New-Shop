@@ -17,9 +17,9 @@ namespace CapaNegocio
             return objCapaDato.Registrar(obj, DetalleAlquiler, out Mensaje);
         }
 
-        public List<DetalleAlquiler> ListarAlquiler(int idcliente)
+        public List<DetalleAlquiler> ListarAlquiler(int idusuario)
         {
-            return objCapaDato.ListarAlquiler(idcliente);
+            return objCapaDato.ListarAlquiler(idusuario);
         }
 
     }

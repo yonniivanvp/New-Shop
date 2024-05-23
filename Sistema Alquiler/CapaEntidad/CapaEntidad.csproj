@@ -44,11 +44,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Administrador.cs" />
     <Compile Include="Barrio.cs" />
     <Compile Include="Carrito.cs" />
     <Compile Include="Categoria.cs" />
     <Compile Include="Ciudad.cs" />
-    <Compile Include="Cliente.cs" />
     <Compile Include="DashBoard.cs" />
     <Compile Include="Departamento.cs" />
     <Compile Include="DetalleAlquiler.cs" />
