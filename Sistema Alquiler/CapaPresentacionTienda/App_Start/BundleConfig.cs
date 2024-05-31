@@ -12,6 +12,15 @@ namespace CapaPresentacionTienda
                         "~/Scripts/jquery-{version}.js",
                         "~/Scripts/jquery-ui-1.13.2.js"));
 
+            bundles.Add(new Bundle("~/bundles/complementos").Include(
+            "~/Scripts/fontawesome/all.min.js",
+            "~/Scripts/DataTables/jquery.dataTables.js",
+            "~/Scripts/DataTables/dataTables.responsive.js",
+            "~/Scripts/loadingOverlay/loadingoverlay.min.js",
+            "~/Scripts/sweetalert.min.js",
+            "~/Scripts/jquery.validate.js",
+            "~/Scripts/scripts.js"));
+
             //bundles.Add(new ScriptBundle("~/bundles/jqueryval").Include(
             //            "~/Scripts/jquery.validate*"));
 
@@ -29,9 +38,12 @@ namespace CapaPresentacionTienda
 
             bundles.Add(new StyleBundle("~/Content/css").Include(
                 "~/Content/Site.css",
+                "~/Content/DataTables/css/jquery.dataTables.css",
+                "~/Content/DataTables/css/responsive.dataTables.css",
                 "~/Content/themes/base/jquery-ui.css",
                 "~/Content/sweetalert.css"
                 ));
+
         }
     }
 }

@@ -18,6 +18,11 @@ namespace CapaNegocio
             return objCapaDato.Listar();
         }
 
+        public List<Producto> ListarProductoArrendatario( int idusuario)
+        {
+            return objCapaDato.ListarProductoArrendatario(idusuario);
+        }
+
         public int Registrar(Producto obj, out string Mensaje)
         {
             Mensaje = string.Empty;
@@ -121,6 +126,11 @@ namespace CapaNegocio
         public bool Eliminar(int id, out string Mensaje)
         {
             return objCapaDato.Eliminar(id, out Mensaje);
+        }
+
+        public bool Eliminar(int id,int idusuario, out string Mensaje)
+        {
+            return objCapaDato.Eliminar(id, idusuario, out Mensaje);
         }
 
     }

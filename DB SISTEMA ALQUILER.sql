@@ -920,5 +920,111 @@ RETURN
 );
 
 
-select *from CLIENTE
-select *from ALQUILER
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------- PROCEDIMIENTO ALMACENADO PARA GENERACION DE REPORTES ALQUILER-----------------------------------------------
+create proc sp_ReporteDashdoardArriendo
+@IdArrendatario int
+as
+begin
+      select
+        -- Contar el número total de clientes
+        (select count(*) from ARRENDADOR ARR
+		inner join ALQUILER A ON A.IdArrendador = ARR.IdArrendador
+		inner join DETALLE_ALQUILER DA ON DA.IdAlquiler = A.IdAlquiler
+		inner join PRODUCTO P ON P.IdProducto = DA.IdProducto
+		inner join ARRENDATARIO ART ON ART.IdArrendatario = P.IdArrendatario
+		WHERE ART.IdArrendatario = @IdArrendatario) AS TotalUsuario,
+
+        -- Sumar la cantidad total de alquileres en la tabla DETALLE_ALQUILER
+        (select isnull(sum(CANTIDAD), 0) from DETALLE_ALQUILER DA
+		inner join PRODUCTO P ON P.IdProducto = DA.IdProducto
+		inner join ARRENDATARIO ART ON ART.IdArrendatario = P.IdArrendatario
+		WHERE ART.IdArrendatario = @IdArrendatario
+		) AS TotalAlquiler,
+
+        -- Contar el número total de productos en la tabla PRODUCTO
+        (select count(*) from PRODUCTO P
+		inner join ARRENDATARIO ART ON ART.IdArrendatario = P.IdArrendatario
+		WHERE ART.IdArrendatario = @IdArrendatario
+		) [TotalProducto]
+end;
+
+
+create proc sp_ReporteAlquilerArriendo(
+	@IdArrendatario int,
+    @fechainicio varchar(10),
+    @fechafin varchar(10),
+    @idtransaccion varchar(50)
+)
+as
+begin
+    -- Establecer el formato de fecha como día/mes/año
+    set dateformat dmy;
+
+    -- Seleccionar y devolver el informe de ventas
+    select 
+        convert(char(10), a.FechaAlquiler, 103) [FechaAlquiler],
+        
+        concat(c.Nombres, ' ', c.Apellidos) [Cliente], p.Nombre [Producto], p.Precio, dv.Cantidad, dv.FechaInicio, dv.FechaFin, dv.Total, a.IdTransaccion
+    from DETALLE_ALQUILER dv
+    inner join PRODUCTO p on p.IdProducto = dv.IdProducto
+    inner join ALQUILER a on a.IdAlquiler = dv.IdAlquiler
+    inner join USUARIO c on c.IdUsuario = a.IdArrendador
+	inner join ARRENDATARIO ART on ART.IdArrendatario = p.IdArrendatario
+    where 
+        -- Filtrar las fechas de alquiler entre la fecha de inicio y la fecha de fin proporcionadas
+        convert(date, a.FechaAlquiler) between @fechainicio and @fechafin
+        
+        -- Filtrar por el ID de la transacción, si se proporciona
+        and a.IdTransaccion = iif(@idtransaccion = '', a.IdTransaccion, @idtransaccion) and ART.IdArrendatario = @IdArrendatario
+end;
+
+
+-------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------- PROCEDIMIENTO ALMACENADO PARA EL CRUD DE PRODUCTO -----------------------------------------------
+create proc sp_ListarProductoArrendatario(
+	@IdArrendatario int
+)
+as
+begin
+	SELECT p.IdProducto, p.Nombre, p.Descripcion, m.IdMarca, m.Descripcion AS DesMarca, c.IdCategoria, c.Descripcion AS DesCategoria,
+			p.Precio, p.Stock, p.RutaImagen, p.NombreImagen, p.Activo, p.IdArrendatario
+	FROM PRODUCTO P
+	INNER JOIN MARCA m ON m.IdMarca = p.IdMarca
+	INNER JOIN CATEGORIA c ON c.IdCategoria = p.IdCategoria
+	INNER JOIN ARRENDATARIO ART ON ART.IdArrendatario = P.IdArrendatario
+	WHERE ART.IdArrendatario = @IdArrendatario
+end;
+
+create proc sp_EliminarProductoArrendatario (
+    @IdProducto int,
+	@IdArrendatario int,
+    @Mensaje varchar(500) output,
+    @Resultado bit output
+)
+as
+begin
+    -- Inicializar el resultado en 0
+    set @Resultado = 0;
+
+    -- Verificar si el producto no está relacionado con ninguna venta en DETALLE_VENTA
+    if not exists (
+        select * from DETALLE_ALQUILER da
+        inner join PRODUCTO p on p.IdProducto = da.IdProducto
+        where p.IdProducto = @IdProducto and p.IdArrendatario = @IdArrendatario
+    )
+    begin
+        -- Eliminar el producto de la tabla PRODUCTO
+        delete top (1) from PRODUCTO where IdProducto = @IdProducto;
+        -- Establecer el resultado como 1 para indicar que la eliminación fue exitosa
+        set @Resultado = 1;
+    end
+    else
+        -- Establecer un mensaje indicando que el producto está relacionado a una venta
+        set @Mensaje = 'El producto se encuentra relacionado a un alquiler';
+end;
+
+
+
+select *from USUARIO
+

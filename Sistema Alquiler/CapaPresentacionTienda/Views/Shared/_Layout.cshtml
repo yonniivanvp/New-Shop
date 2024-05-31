@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@ViewBag.Title - Mi aplicación ASP.NET</title>
     @Styles.Render("~/Content/css")
-    @Scripts.Render("~/bundles/modernizr")
+    @*Scripts.Render("~/bundles/modernizr")*@
 
 </head>
 <body class="d-flex flex-column min-vh-100">
@@ -49,7 +49,7 @@
                                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
                                     <li><a class="dropdown-item" href="#!"><b>@User.Identity.Name</b></a></li>
                                     <li><a class="dropdown-item" href="@Url.Action("MiAlquiler","Tienda")">Mi Alquiler</a></li>
-                                    <li><a class="dropdown-item" href="#">Perfil Arrendatario</a></li>
+                                    <li><a class="dropdown-item" href="@Url.Action("Index","Home")">Perfil Arrendatario</a></li>
                                     <li><hr class="dropdown-divider" /></li>
                                     <li><a class="dropdown-item" href="@Url.Action("CerrarSesion","Acceso")">Cerrar Sesion</a></li>
                                 </ul>

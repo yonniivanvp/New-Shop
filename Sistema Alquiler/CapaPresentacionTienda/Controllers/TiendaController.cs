@@ -316,7 +316,7 @@ namespace CapaPresentacionTienda.Controllers
                 purchase_units = new List<PurchaseUnit>() { purchaseUnit },
                 application_context = new ApplicationContext()
                 {
-                    brand_name = "MiAlquiler.com",
+                    brand_name = "http://www.MiAlquiler.somee.com",
                     landing_page = "NO_PREFERENCE",
                     user_action = "PAY_NOW",
                     return_url = "https://localhost:44333/Tienda/PagoEfectuado",
@@ -397,6 +397,7 @@ namespace CapaPresentacionTienda.Controllers
 
             return View(oLista);
         }
+
 
 
     }

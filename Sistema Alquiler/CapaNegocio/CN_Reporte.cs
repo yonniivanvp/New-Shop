@@ -17,9 +17,20 @@ namespace CapaNegocio
             return objCapaDato.Alquiler(fechainicio, fechafin, idtransaccion);
         }
 
+        public List<Reporte> AlquilerArrendatario(int idusuario, string fechainicio, string fechafin, string idtransaccion)
+        {
+            return objCapaDato.AlquilerArrendatario(idusuario, fechainicio, fechafin, idtransaccion);
+        }
+
         public DashBoard VerDashBoard()
         {
             return objCapaDato.VerDashBoard();
         }
+
+        public DashBoard VerDashBoardArrendatario( int idusuario)
+        {
+            return objCapaDato.VerDashBoardArrendatario(idusuario);
+        }
+
     }
 }

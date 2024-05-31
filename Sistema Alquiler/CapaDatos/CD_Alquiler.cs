@@ -62,7 +62,7 @@ namespace CapaDatos
                 //Cadena de conexicion a SQL
                 using (SqlConnection oconexion = new SqlConnection(Conexion.cn))
                 {
-                    string query = "select *from fn_ListarAlquiler(@idusuario)";
+                    string query = "select *from fn_ListarAlquiler(@IdArrendador)";
 
                     SqlCommand cmd = new SqlCommand(query, oconexion);
                     cmd.Parameters.AddWithValue("@IdArrendador", idusuario);

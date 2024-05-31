@@ -76,6 +76,57 @@ namespace CapaDatos
         }
 
 
+        public List<Producto> ListarProductoArrendatario(int idusuario)
+        {
+
+            List<Producto> lista = new List<Producto>();
+
+            try
+            {
+                //Cadena de conexicion a SQL
+                using (SqlConnection oconexion = new SqlConnection(Conexion.cn))
+                {
+                    SqlCommand cmd = new SqlCommand("sp_ListarProductoArrendatario", oconexion);
+                    cmd.Parameters.AddWithValue("IdArrendatario", idusuario);
+
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    oconexion.Open();
+
+                    //Lee la ejecucion de la consulta
+                    using (SqlDataReader dr = cmd.ExecuteReader())
+                    {
+                        while (dr.Read())
+                        {
+                            lista.Add(new Producto()
+                            {
+                                IdProducto = Convert.ToInt32(dr["IdProducto"]),
+                                Nombre = dr["Nombre"].ToString(),
+                                Descripcion = dr["Descripcion"].ToString(),
+                                oMarca = new Marca() { IdMarca = Convert.ToInt32(dr["IdMarca"]), Descripcion = dr["DesMarca"].ToString() },
+                                oCategoria = new Categoria() { IdCategoria = Convert.ToInt32(dr["IdCategoria"]), Descripcion = dr["DesCategoria"].ToString() },
+                                Precio = Convert.ToDecimal(dr["Precio"], new CultureInfo("es-CO")),
+                                Stock = Convert.ToInt32(dr["Stock"]),
+                                RutaImagen = dr["RutaImagen"].ToString(),
+                                NombreImagen = dr["NombreImagen"].ToString(),
+                                Activo = Convert.ToBoolean(dr["Activo"]),
+                                IdArrendatario = Convert.ToInt32(dr["IdArrendatario"])
+
+                            });
+
+                        }
+                    }
+
+                }
+            }
+            catch
+            {
+                lista = new List<Producto>();
+            }
+
+            return lista;
+        }
+
+
         public int Registrar(Producto obj, out string Mensaje)
         {
 
@@ -240,6 +291,40 @@ namespace CapaDatos
             return resultado;
         }
 
+        public bool Eliminar(int id, int idusuario, out string Mensaje)
+        {
+            bool resultado = false;
+            Mensaje = string.Empty;
+
+            try
+            {
+                using (SqlConnection oconexion = new SqlConnection(Conexion.cn))
+                {
+                    SqlCommand cmd = new SqlCommand("sp_EliminarProductoArrendatario", oconexion);
+                    cmd.Parameters.AddWithValue("IdProducto", id);
+                    cmd.Parameters.AddWithValue("IdArrendatario", idusuario);
+
+                    cmd.Parameters.Add("Resultado", SqlDbType.Bit).Direction = ParameterDirection.Output;
+                    cmd.Parameters.Add("Mensaje", SqlDbType.VarChar, 500).Direction = ParameterDirection.Output;
+
+                    cmd.CommandType = CommandType.StoredProcedure;
+
+                    oconexion.Open();
+
+                    cmd.ExecuteNonQuery();
+
+                    resultado = Convert.ToBoolean(cmd.Parameters["Resultado"].Value);
+                    Mensaje = cmd.Parameters["Mensaje"].Value.ToString();
+                }
+            }
+            catch (Exception ex)
+            {
+                resultado = false;
+                Mensaje = ex.Message;
+            }
+
+            return resultado;
+        }
 
 
     }

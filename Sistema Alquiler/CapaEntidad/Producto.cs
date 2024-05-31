@@ -16,7 +16,6 @@ namespace CapaEntidad
         public string NombreImagen { get; set; }
         public bool Activo { get; set; }
         public int IdArrendatario { get; set; }
-
         public string Base64 { get; set; }
         public string Extension { get; set; }
     }
