@@ -1,6 +1,6 @@
 ﻿using CapaEntidad;
 using CapaNegocio;
-using CapaNegocio.Paypal;
+using CapaEntidad.Paypal;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -316,7 +316,7 @@ namespace CapaPresentacionTienda.Controllers
                 purchase_units = new List<PurchaseUnit>() { purchaseUnit },
                 application_context = new ApplicationContext()
                 {
-                    brand_name = "http://www.MiAlquiler.somee.com",
+                    brand_name = "MiAlquiler.com",
                     landing_page = "NO_PREFERENCE",
                     user_action = "PAY_NOW",
                     return_url = "https://localhost:44333/Tienda/PagoEfectuado",

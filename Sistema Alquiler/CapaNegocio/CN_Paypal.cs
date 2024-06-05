@@ -8,7 +8,7 @@ using System.Configuration;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using Newtonsoft.Json;
-using CapaNegocio.Paypal;
+using CapaEntidad.Paypal;
 
 namespace CapaNegocio
 {

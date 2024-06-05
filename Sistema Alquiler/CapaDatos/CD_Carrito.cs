@@ -184,8 +184,8 @@ namespace CapaDatos
                                     oMarca = new Marca() { Descripcion = dr["DesMarca"].ToString() }
                                 },
                                 Cantidad = Convert.ToInt32(dr["Cantidad"]),
-                                FechaInicio = dr["FechaInicio"].ToString(),
-                                FechaFin = dr["FechaFin"].ToString()
+                                FechaInicio = Convert.ToDateTime(dr["FechaInicio"]).ToString("dd/MM/yyyy"),
+                                FechaFin = Convert.ToDateTime(dr["FechaFin"]).ToString("dd/MM/yyyy")
 
                             });
 
